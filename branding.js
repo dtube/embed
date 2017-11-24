@@ -14,7 +14,7 @@ var _videoJs2 = _interopRequireDefault(_videoJs);
 
 var defaults = {
   branding: true,
-  settings: true,
+  qualities: [],
   title: "Logo Title",
   destination: "http://www.google.com",
   destinationTarget: "_blank"
@@ -23,19 +23,50 @@ var defaults = {
 var onPlayerReady = function onPlayerReady(player, options) {
   console.log(options)
 
-  if (options.settings) {
-    // var MenuButton = videojs.getComponent('MenuButton');
-    // var settingsButton = new MenuButton(player)
-    // settingsButton.addClass("vjs-icon-cog")
-    // settingsButton.addClass("vjs-fullscreen-control")
-    
-    // var settingsMenu = settingsButton.createMenu()
-    // settingsMenu.createItems = function() {
+  if (options.qualities) {
+    var MenuButton = videojs.getComponent('MenuButton');
+    var MenuItem = videojs.getComponent('MenuItem');
 
-    // }
-    // console.log(settingsButton.createItems)
-    // player.controlBar.el().insertBefore(settingsButton.el(), player.controlBar.fullscreenToggle.el());
+    var settingsButton = new MenuButton(player)
+    settingsButton.addClass("quality-button")
+    settingsButton.addClass("vjs-audio-button")
     
+    var settingsMenu = settingsButton.createMenu()
+    var qualities = options.qualities
+
+    for (var q = 0; q < qualities.length; q++) {
+      var menuItem = new MenuItem(player, {
+        label: qualities[q].label
+      })
+      menuItem.addClass("quality-item")
+      settingsMenu.addChild(menuItem)
+    }
+    
+    settingsButton.addChild(settingsMenu)
+    player.controlBar.el().insertBefore(settingsButton.el(), player.controlBar.fullscreenToggle.el());
+    
+    for (var q = 0; q < document.getElementsByClassName('quality-item').length; q++) {
+      document.getElementsByClassName('quality-item')[q].addEventListener("click", function( event ) {
+        var quality = '';
+        if (event.target.innerHTML.length > 10)
+          quality = event.target.getElementsByClassName('vjs-menu-item-text')[0].innerHTML
+        else quality = event.target.innerHTML
+        
+        console.log('Switching to '+quality, qualities)
+        for (let index = 0; index < qualities.length; index++) {
+          if (qualities[index].label == quality) {
+            var currentTime = player.currentTime()
+            document.getElementsByTagName('video')[0].src = qualities[index].src
+            player.play()
+            player.currentTime(currentTime)
+          }
+            
+        }
+      }, false);
+    }
+    document.getElementsByClassName('quality-button')[0].addEventListener("click", function( event ) {
+      console.log('Switch to next quality')
+    }, false);
   }
 
   if (options.branding) {
