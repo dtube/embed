@@ -4,6 +4,7 @@
 <script src="https://vjs.zencdn.net/6.2.7/video.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.98.20/webtorrent.min.js"></script>
 <script src="branding.js"></script>
+<script src="persistvolume.js"></script>
 <style>/*!
  * videojs-iplayer-skin-1
  * A Video.JS skin modelled on the new iPlayer theme.
@@ -29,7 +30,7 @@
   ]
   player = null
   itLoaded = false
-  steem.api.setOptions({ url: 'wss://steemd.privex.io' });
+  steem.api.setOptions({ url: 'https://api.steemit.com' });
   var path=window.location.href.split("#!/")[1];
   var autoplay = (path.split("/")[2] == 'true')
   var nobranding = (path.split("/")[3] == 'true')
@@ -87,14 +88,18 @@
         currentTimeDisplay:false,
         timeDivider:false,
         durationDisplay:false
+      },
+      plugins: {
+        persistvolume: {
+          namespace: 'dtube'
+        }
       }
     });
-    if (!nobranding)
-      player.brand({
-        image:"https://emb.d.tube/logo.png",
-        title:"Watch on DTube",
-        destination:"http://d.tube/#!/v/"+path.split("/")[0]+'/'+path.split("/")[1],destinationTarget:"_blank"
-      })
+    player.brand({
+      branding: !JSON.parse(nobranding),
+      title:"Watch on DTube",
+      destination:"http://d.tube/#!/v/"+path.split("/")[0]+'/'+path.split("/")[1],destinationTarget:"_blank"
+    })
   }
 
   function removePlayer() {
