@@ -37,7 +37,12 @@ var onPlayerReady = function onPlayerReady(player, options) {
       var menuItem = new MenuItem(player, {
         label: qualities[q].label
       })
+
+      if (qualities[q].src == document.getElementsByTagName('video')[0].src)
+        menuItem.addClass("vjs-selected")
+
       menuItem.addClass("quality-item")
+
       settingsMenu.addChild(menuItem)
     }
     settingsButton.addChild(settingsMenu)
@@ -56,8 +61,13 @@ var onPlayerReady = function onPlayerReady(player, options) {
             document.getElementsByTagName('video')[0].src = qualities[index].src
             player.play()
             player.currentTime(currentTime)
-          }
-            
+            if (document.getElementsByClassName('quality-item vjs-selected').length > 0)
+              document.getElementsByClassName('quality-item vjs-selected')[0].classList.remove("vjs-selected")
+            console.log(event.target)
+            if (event.target.innerHTML.length > 10)
+              event.target.classList.add("vjs-selected")
+            else event.target.parentElement.classList.add("vjs-selected")
+          }            
         }
       }, false);
     }
