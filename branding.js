@@ -21,10 +21,8 @@ var defaults = {
 };
 
 var onPlayerReady = function onPlayerReady(player, options) {
-  console.log(options)
 
   if (options.qualities.length > 1) {
-    console.log(options)
     var MenuButton = videojs.getComponent('MenuButton');
     var MenuItem = videojs.getComponent('MenuItem');
 
@@ -42,7 +40,6 @@ var onPlayerReady = function onPlayerReady(player, options) {
       menuItem.addClass("quality-item")
       settingsMenu.addChild(menuItem)
     }
-    console.log(settingsMenu)
     settingsButton.addChild(settingsMenu)
     player.controlBar.el().insertBefore(settingsButton.el(), player.controlBar.fullscreenToggle.el());
     
@@ -53,7 +50,6 @@ var onPlayerReady = function onPlayerReady(player, options) {
           quality = event.target.getElementsByClassName('vjs-menu-item-text')[0].innerHTML
         else quality = event.target.innerHTML
         
-        console.log('Switching to '+quality, qualities)
         for (let index = 0; index < qualities.length; index++) {
           if (qualities[index].label == quality) {
             var currentTime = player.currentTime()
