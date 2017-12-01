@@ -58,14 +58,19 @@
           this.controlText('Quality');
           this.addClass('vjs-resolution-switcher')
   
-          if(options.dynamicLabel){
-            videojs.addClass(this.label, 'vjs-resolution-button-label');
-            this.el().appendChild(this.label);
-          }else{
-            var staticLabel = document.createElement('span');
-            videojs.addClass(staticLabel, 'vjs-menu-icon');
-            this.el().appendChild(staticLabel);
-          }
+          videojs.dom.addClass(this.label, 'vjs-resolution-button-label');
+          
+          this.label.addEventListener("click", function(){
+            var cur = player.currentResolutionState.label
+            var i = 1;
+            while (cur != player.currentSources[i-1].label)
+              i++
+            if (i == player.currentSources.length)
+              i=0
+            player.currentResolution(player.currentSources[i].label)
+          });
+          this.el().appendChild(this.label);
+
           player.on('updateSources', videojs.bind( this, this.update ) );
           player.on('resolutionchange', videojs.bind(this, this.update));
         }
@@ -138,6 +143,11 @@
             label: chosen.label,
             sources: chosen.sources
           };
+          chosen.sources = []
+          for (let i = 0; i < this.currentSources.length; i++) {
+            if (this.currentSources[i].label == chosen.label)
+              chosen.sources.push(this.currentSources[i]) 
+          }
   
           player.trigger('updateSources');
           player.setSourcesSanitized(chosen.sources, chosen.label);
@@ -173,7 +183,7 @@
           // Probably because of https://github.com/videojs/video-js-swf/issues/124
           // If player preload is 'none' and then loadeddata not fired. So, we need timeupdate event for seek handle (timeupdate doesn't work properly with flash)
           var handleSeekEvent = 'loadeddata';
-          if(this.player_.techName_ !== 'Youtube' && this.player_.preload() === 'none' && this.player_.techName_ !== 'Flash') {
+          if(this.player_.preload() === 'none') {
             handleSeekEvent = 'timeupdate';
           }
           player
@@ -269,86 +279,8 @@
                 sources: groupedSrc.res[settings['default']]
             }
             return obj;
-
-            // var selectedRes = settings['default']; // use array access as default is a reserved keyword
-            // var selectedLabel = '';
-            // if (selectedRes === 'high') {
-            //     selectedRes = src[0].res;
-            //     selectedLabel = src[0].label;
-            // } else if (selectedRes === 'low' || selectedRes == null || !groupedSrc.res[selectedRes]) {
-            //     // Select low-res if default is low or not set
-            //     selectedRes = src[src.length - 1].res;
-            //     selectedLabel = src[src.length -1].label;
-            // } else if (groupedSrc.res[selectedRes]) {
-            //     selectedLabel = groupedSrc.res[selectedRes][0].label;
-            // }
-
-            
-            // console.log(src)
-            // return {res: selectedRes, label: selectedLabel, sources: groupedSrc.res[selectedRes]};
         }
-  
-        function initResolutionForYt(player){
-          // Map youtube qualities names
-          var _yts = {
-            highres: {res: 1080, label: '1080', yt: 'highres'},
-            hd1080: {res: 1080, label: '1080', yt: 'hd1080'},
-            hd720: {res: 720, label: '720', yt: 'hd720'},
-            large: {res: 480, label: '480', yt: 'large'},
-            medium: {res: 360, label: '360', yt: 'medium'},
-            small: {res: 240, label: '240', yt: 'small'},
-            tiny: {res: 144, label: '144', yt: 'tiny'},
-            auto: {res: 0, label: 'auto', yt: 'auto'}
-          };
-          // Overwrite default sourcePicker function
-          var _customSourcePicker = function(_player, _sources, _label){
-            // Note that setPlayebackQuality is a suggestion. YT does not always obey it.
-            player.tech_.ytPlayer.setPlaybackQuality(_sources[0]._yt);
-            player.trigger('updateSources');
-            return player;
-          };
-          settings.customSourcePicker = _customSourcePicker;
-  
-          // Init resolution
-          player.tech_.ytPlayer.setPlaybackQuality('auto');
-  
-          // This is triggered when the resolution actually changes
-          player.tech_.ytPlayer.addEventListener('onPlaybackQualityChange', function(event){
-            for(var res in _yts) {
-              if(res.yt === event.data) {
-                player.currentResolution(res.label, _customSourcePicker);
-                return;
-              }
-            }
-          });
-  
-          // We must wait for play event
-          player.one('play', function(){
-            var qualities = player.tech_.ytPlayer.getAvailableQualityLevels();
-            var _sources = [];
-  
-            qualities.map(function(q){
-              _sources.push({
-                src: player.src().src,
-                type: player.src().type,
-                label: _yts[q].label,
-                res: _yts[q].res,
-                _yt: _yts[q].yt
-              });
-            });
-  
-            player.groupedSrc = bucketSources(_sources);
-            var chosen = {label: 'auto', res: 0, sources: player.groupedSrc.label.auto};
-  
-            this.currentResolutionState = {
-              label: chosen.label,
-              sources: chosen.sources
-            };
-  
-            player.trigger('updateSources');
-            player.setSourcesSanitized(chosen.sources, chosen.label, _customSourcePicker);
-          });
-        }
+
   
         player.ready(function(){
           if( settings.ui ) {
@@ -359,20 +291,13 @@
             };
           }
           if(player.options_.sources.length > 1){
-            // tech: Html5 and Flash
-            // Create resolution switcher for videos form <source> tag inside <video>
             player.updateSrc(player.options_.sources);
-          }
-  
-          if(player.techName_ === 'Youtube'){
-           // tech: YouTube
-           initResolutionForYt(player);
           }
         });
   
       };
   
       // register the plugin
-      videojs.plugin('videoJsResolutionSwitcher', videoJsResolutionSwitcher);
+      videojs.registerPlugin('videoJsResolutionSwitcher', videoJsResolutionSwitcher);
     })(window, videojs);
   })();

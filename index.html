@@ -56,15 +56,28 @@
   var nobranding = (path.split("/")[3] == 'true')
   var videoGateway = path.split("/")[4]
   var snapGateway = path.split("/")[5]
-  steem.api.getContent(path.split("/")[0], path.split("/")[1], function(d,b){
+  
+  steem.api.getContent(path.split("/")[0], path.split("/")[1], function(err,b){
+    if (err) {
+      console.log(err)
+      return
+    }
+
     var a=JSON.parse(b.json_metadata).video;
     if (!videoGateway) videoGateway = gatewayByHash(a.content.videohash)
     if (!snapGateway) snapGateway = gatewayByHash(a.info.snaphash)
     var qualities = []
-    qualities.push({label: 'Source', type: 'video/mp4', src: linkByHash(a.content.videohash)})
-    if (a.content.video480hash)
+    
+    if (a.content.video480hash) {
       qualities.push({label: '480p', type: 'video/mp4', src: linkByHash(a.content.video480hash)})
-    createPlayer(linkByHash(a.content.videohash), linkByHash(a.info.snaphash), autoplay, nobranding, qualities)
+      qualities.push({label: 'Source', type: 'video/mp4', src: linkByHash(a.content.videohash)})
+      createPlayer(linkByHash(a.info.snaphash), autoplay, nobranding, qualities)
+    } else {
+      qualities.push({label: 'Source', type: 'video/mp4', src: linkByHash(a.content.videohash)})
+      createPlayer(linkByHash(a.info.snaphash), autoplay, nobranding, qualities)
+    }
+      
+    
 
     // if there's a magnet link, start torrent in background
     if (a.content.magnet) {
@@ -85,9 +98,9 @@
     }
   });
 
-  function createPlayer(videoUrl, posterUrl, autoplay, branding, qualities) {
+  function createPlayer( posterUrl, autoplay, branding, qualities) {
     var c=document.createElement("video");
-    c.src=videoUrl;
+    //c.src=videoUrl;
     c.poster=posterUrl;
     c.controls=true;
     c.autoplay=autoplay;
@@ -101,10 +114,7 @@
     });
     document.body.appendChild(c);
     player=videojs("player",{
-      sourceOrder:true,
-      sources:[
-        {src:videoUrl,type:"video/mp4"}
-      ],
+      sources:qualities,
       techOrder:["html5"],
       playbackRates:[0.25,0.5,0.75,1,1.25,1.5,2],
       controlBar:{
@@ -117,18 +127,16 @@
           namespace: 'dtube'
         },
         videoJsResolutionSwitcher: {
-          default: 'Source',
-          dynamicLabel: true
+          default: qualities[0].label
         }
       }
     });
     player.brand({
       branding: !JSON.parse(nobranding),
       title:"Watch on DTube",
-      destination:"http://d.tube/#!/v/"+path.split("/")[0]+'/'+path.split("/")[1],destinationTarget:"_blank",
-      //qualities: qualities
+      destination:"http://d.tube/#!/v/"+path.split("/")[0]+'/'+path.split("/")[1],destinationTarget:"_blank"
     })
-    player.updateSrc(qualities)
+    //player.updateSrc(qualities)
     player.on('resolutionchange', function(){
       console.info('Source changed to %s', player.src())
     })
