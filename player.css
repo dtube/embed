@@ -794,6 +794,6 @@ a:-webkit-any-link {
   flex: auto;
   font-size: 1em;
   line-height: 3em;
-  visibility: collapse;
+  visibility: hidden;
   display: block!important;
 }
