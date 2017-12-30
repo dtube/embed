@@ -1,15 +1,7 @@
 "use strict";
 (function(factory){
-  /*!
-   * Custom Universal Module Definition (UMD)
-   *
-   * Video.js will never be a non-browser lib so we can simplify UMD a bunch and
-   * still support requirejs and browserify. This also needs to be closure
-   * compiler compatible, so string keys are used.
-   */
   if (typeof define === 'function' && define['amd']) {
     define(['./video'], function(vjs){ factory(window, document, vjs) });
-  // checking that module is an object too because of umdjs/umd#35
   } else if (typeof exports === 'object' && typeof module === 'object') {
     factory(window, document, require('video.js'));
   } else {
@@ -17,9 +9,7 @@
   }
 
 })(function(window, document, vjs) {
-  //cookie functions from https://developer.mozilla.org/en-US/docs/DOM/document.cookie
-  var
-  getCookieItem = function(sKey) {
+  var getCookieItem = function(sKey) {
     if (!sKey || !hasCookieItem(sKey)) { return null; }
     var reg_ex = new RegExp(
       "(?:^|.*;\\s*)" +
