@@ -104,11 +104,11 @@
     extend(img.style, settings['0'].style);
 
     // center the thumbnail over the cursor if an offset wasn't provided
-    // if (!img.style.left && !img.style.right) {
-    //   img.onload = function() {
-    //     img.style.left = -(img.naturalWidth / 2) + 'px';
-    //   };
-    // }
+    if (!img.style.left && !img.style.right) {
+      img.onload = function() {
+        img.style.left = -(img.naturalWidth / 2) + 'px';
+      };
+    }
 
     // keep track of the duration to calculate correct thumbnail to display
     duration = player.duration();
@@ -163,17 +163,17 @@
         extend(img.style, setting.style);
       }
 
-      // width = getVisibleWidth(img, setting.width || settings[0].width);
-      // halfWidth = width / 2;
+      width = getVisibleWidth(img, setting.width || settings[0].width);
+      halfWidth = width / 2;
 
       // make sure that the thumbnail doesn't fall off the right side of the left side of the player
-      // if ( (left + halfWidth) > right ) {
-      //   left -= (left + halfWidth) - right;
-      // } else if (left < halfWidth) {
-      //   left = halfWidth;
-      // }
+      if ( (left + halfWidth) > right ) {
+        left -= (left + halfWidth) - right;
+      } else if (left < halfWidth) {
+        left = halfWidth;
+      }
 
-      // div.style.left = left + 'px';
+      div.style.left = left + 'px';
     };
 
     // update the thumbnail while hovering
@@ -181,7 +181,7 @@
     progressControl.on('touchmove', moveListener);
 
     moveCancel = function(event) {
-      div.style = 'position: absolute;float: left;bottom: 50px;max-height: 118px;width: 210px;left: 20px;bottom: 50px; overflow: hidden;';
+      div.style = 'position: absolute;bottom: 70px;max-height: 118px;width: 210px; overflow: hidden;';
     };
 
     // move the placeholder out of the way when not hovering
