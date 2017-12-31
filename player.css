@@ -277,13 +277,14 @@ display: -webkit-box;
 
 
 
-.vjs-branding-logo:after{   
+.vjs-branding-logo{   
    color: white;
   display: block;
-  content: '\f04b' ' ''Tube';
+  background-image: url(DTube_White.svg);
   font-size: 1.5em;
   line-height: 2em;
   font-weight: 600;
+  background-repeat: no-repeat;
 }
 
 a:-webkit-any-link {

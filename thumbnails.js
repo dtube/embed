@@ -128,7 +128,6 @@
     progressControl.el().appendChild(div);
 
     moveListener = function(event) {
-      console.log(event)
       var mouseTime, time, active, left, setting, pageX, right, width, halfWidth, pageXOffset, clientRect;
       active = 0;
       pageXOffset = getScrollOffset().x;
