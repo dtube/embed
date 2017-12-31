@@ -44,7 +44,7 @@
       var a = JSON.parse(b.json_metadata).video;
 
       var qualities = generateQualities(a, videoGateway)
-      createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, canonicalUrl(a.info.spritehash), a.info.duration)
+      createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration)
 
       // trying to find something that answers faster than the canonical gateway
       if (!videoGateway)
@@ -89,70 +89,58 @@
       });
       document.body.appendChild(c);
       player = videojs("player", {
-          inactivityTimeout: 1000,
-          sourceOrder: true,
-          sources: qualities,
-          techOrder: ["html5"],
-          'playbackRates': [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2],
-          controlBar: {
-            children: {
-              'playToggle': {},
-              'muteToggle': {},
-              'volumeControl': {},
-              'currentTimeDisplay': {},
-              'timeDivider': {},
-              'durationDisplay': {},
-              'liveDisplay': {},
-              'flexibleWidthSpacer': {},
-              'progressControl': {},
-              'settingsMenuButton': {
-                entries: [
-                  'playbackRateMenuButton'
-                ]
-              },
-              'fullscreenToggle': {}
-            }
-          },
-          plugins: {
-            persistvolume: {
-              namespace: 'dtube'
+        inactivityTimeout: 1000,
+        sourceOrder: true,
+        sources: qualities,
+        techOrder: ["html5"],
+        'playbackRates': [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2],
+        controlBar: {
+          children: {
+            'playToggle': {},
+            'muteToggle': {},
+            'volumeControl': {},
+            'currentTimeDisplay': {},
+            'timeDivider': {},
+            'durationDisplay': {},
+            'liveDisplay': {},
+            'flexibleWidthSpacer': {},
+            'progressControl': {},
+            'settingsMenuButton': {
+              entries: [
+                'playbackRateMenuButton'
+              ]
             },
-            videoJsResolutionSwitcher: {
-              default: qualities[0].label
+            'fullscreenToggle': {}
+          }
+        },
+        plugins: {
+          persistvolume: {
+            namespace: 'dtube'
+          },
+          videoJsResolutionSwitcher: {
+            default: qualities[0].label
+          }
+        }
+      })
+
+      if (sprite) {
+        var listThumbnails = {}
+        var nFrames = 100
+        if (duration < 100) nFrames = Math.floor(duration)
+        for (let s = 0; s < nFrames; s++) {
+          var nSeconds = nFrames
+          if (duration > 100) nSeconds = Math.floor(s*duration/100)
+          listThumbnails[nSeconds] = {
+            src: canonicalUrl(sprite),
+            style: {
+              margin: -118*s+'px 0px 0px 0px',
             }
           }
-        }),
-        //DURATION
-        console.log(Math.round(duration))
-        player.thumbnails({
-          0: {
-            src: sprite,
-            style: {
-              left: '20px',
-              margin: '-236px 0px 0px 0px',
-            }
-          },
-          10: {
-            style: {
-              margin: '-354px 0px 0px 0px',
-            }
-          },
-          20: {
-            style: {
-              margin: '-472px 0px 0px 0px',
-            }
-          },
-          30: {
-            style: {
-              margin: '-590px 0px 0px 0px',
-            }
-          },
-          40: {
-            style: {
-              margin: '-708px 0px 0px 0px',
-            }
-          }
-        });
+        }
+        player.thumbnails(listThumbnails);
+      }
+      
+
       videojs('player').ready(function () {
         this.hotkeys({
           volumeStep: 0.05,
@@ -160,6 +148,7 @@
           enableModifiersForNumbers: false
         });
       });
+
       player.brand({
         branding: !JSON.parse(nobranding),
         title: "Watch on DTube",
