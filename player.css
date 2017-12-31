@@ -436,6 +436,8 @@ a:-webkit-any-link {
     margin: 0
 }
 
+
+
 .video-js .vjs-progress-control:hover {
     height: 1.5em;
     top: -1.5em;
@@ -818,4 +820,13 @@ a:-webkit-any-link {
 .vjs-progress-control:hover .vjs-thumbnail:hover,
 .vjs-progress-control:active .vjs-thumbnail:active {
   opacity: 0;
+}
+
+.video-js .vjs-progress-control .vjs-mouse-display {
+  display: none;
+  position: absolute;
+  width: 0px;
+  height: 100%;
+  background-color: #000;
+  z-index: 1;
 }

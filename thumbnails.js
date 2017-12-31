@@ -128,6 +128,7 @@
     progressControl.el().appendChild(div);
 
     moveListener = function(event) {
+      console.log(event)
       var mouseTime, time, active, left, setting, pageX, right, width, halfWidth, pageXOffset, clientRect;
       active = 0;
       pageXOffset = getScrollOffset().x;
@@ -177,7 +178,7 @@
     };
 
     // update the thumbnail while hovering
-    progressControl.on('mouseenter', moveListener);
+    // progressControl.on('mouseenter', moveListener);
     progressControl.on('mousemove', moveListener);
     progressControl.on('touchmove', moveListener);
 
