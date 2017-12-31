@@ -177,11 +177,12 @@
     };
 
     // update the thumbnail while hovering
+    progressControl.on('mouseenter', moveListener);
     progressControl.on('mousemove', moveListener);
     progressControl.on('touchmove', moveListener);
 
     moveCancel = function(event) {
-      div.style = 'position: absolute;bottom: 70px;max-height: 118px;width: 210px; overflow: hidden;';
+      div.style = 'position: absolute;bottom: 30px;max-height: 118px;width: 210px; margin-left:-110;overflow: hidden;border:1px solid black;';
     };
 
     // move the placeholder out of the way when not hovering
