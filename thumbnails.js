@@ -1,7 +1,7 @@
 (function() {
   var defaults = {
       0: {
-        src: 'example-thumbnail.png'
+        src: 'no-thumbnail.png'
       }
     },
     extend = function() {
