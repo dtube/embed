@@ -139,14 +139,6 @@
   width: 4em
 }
 
-.video-js .vjs-progress-control {
-  position: absolute;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: .5em;
-  top: -.5em
-}
 
 
 .video-js.vjs-live .vjs-live-control {
@@ -285,13 +277,14 @@ display: -webkit-box;
 
 
 
-.vjs-branding-logo:after{   
+.vjs-branding-logo{   
    color: white;
   display: block;
-  content: '\f04b' ' ''Tube';
+  background-image: url(DTube_White.svg);
   font-size: 1.5em;
   line-height: 2em;
   font-weight: 600;
+  background-repeat: no-repeat;
 }
 
 a:-webkit-any-link {
@@ -431,8 +424,9 @@ a:-webkit-any-link {
     left: 0;
     right: 0;
     width: 100%;
-    height: .5em;
-    top: -.5em
+    height: 1.5em;
+    top: -1.5em;
+    padding-top:1em;
 }
 
 .video-js .vjs-progress-control .vjs-load-progress,.video-js .vjs-progress-control .vjs-play-progress,.video-js .vjs-progress-control .vjs-progress-holder {
@@ -443,9 +437,12 @@ a:-webkit-any-link {
     margin: 0
 }
 
+
+
 .video-js .vjs-progress-control:hover {
     height: 1.5em;
-    top: -1.5em
+    top: -1.5em;
+    padding-top:0em;
 }
 
 
@@ -796,4 +793,41 @@ a:-webkit-any-link {
   line-height: 3em;
   visibility: hidden;
   display: block!important;
+}
+
+.vjs-thumbnail-holder {
+  position: absolute;
+  left: -1000px;
+}
+
+/* the thumbnail image itself */
+.vjs-thumbnail {
+  opacity: 0;
+  transition: opacity .2s ease;
+  -webkit-transition: opacity .2s ease;
+  -moz-transition: opacity .2s ease;
+  -mz-transition: opacity .2s ease;
+}
+
+/* fade in the thumbnail when hovering over the progress bar */
+/* .fake-active is needed for Android only. It's removed on touchend/touchecancel */
+.vjs-progress-control:hover .vjs-thumbnail,
+.vjs-progress-control.fake-active .vjs-thumbnail,
+.vjs-progress-control:active .vjs-thumbnail {
+  opacity: 1;
+}
+
+/* ... but hide the thumbnail when hovering directly over it */
+.vjs-progress-control:hover .vjs-thumbnail:hover,
+.vjs-progress-control:active .vjs-thumbnail:active {
+  opacity: 0;
+}
+
+.video-js .vjs-progress-control .vjs-mouse-display {
+  display: none;
+  position: absolute;
+  width: 0px;
+  height: 100%;
+  background-color: #000;
+  z-index: 1;
 }

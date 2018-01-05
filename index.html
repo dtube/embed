@@ -12,6 +12,7 @@
   <script src="settingsmenubuttons.js"></script>
   <script src="settingsmenuitem.js"></script>
   <script src="hotkeys.js"></script>
+  <script src="thumbnails.js"></script>
 </head>
 
 <body style='margin:0'>
@@ -43,18 +44,18 @@
       var a = JSON.parse(b.json_metadata).video;
 
       var qualities = generateQualities(a, videoGateway)
-      createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities)
+      createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration)
 
       // trying to find something that answers faster than the canonical gateway
       if (!videoGateway)
-        findBestUrl(qualities[0].hash, function(url) {
+        findBestUrl(qualities[0].hash, function (url) {
           for (let i = 0; i < qualities.length; i++) {
             if (qualities[i].label !== qualities[0].label) break
             qualities[i].src = url
           }
           player.updateSrc(qualities)
         })
-      
+
 
       // if there's a magnet link, start torrent in background
       if (a.content.magnet) {
@@ -73,7 +74,7 @@
       }
     });
 
-    function createPlayer(posterUrl, autoplay, branding, qualities) {
+    function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration) {
       var c = document.createElement("video");
       c.poster = posterUrl;
       c.controls = true;
@@ -120,7 +121,26 @@
             default: qualities[0].label
           }
         }
-      });
+      })
+
+      if (sprite) {
+        var listThumbnails = {}
+        var nFrames = 100
+        if (duration < 100) nFrames = Math.floor(duration)
+        for (let s = 0; s < nFrames; s++) {
+          var nSeconds = nFrames
+          if (duration > 100) nSeconds = Math.floor(s*duration/100)
+          listThumbnails[nSeconds] = {
+            src: canonicalUrl(sprite),
+            style: {
+              margin: -118*s+'px 0px 0px 0px',
+            }
+          }
+        }
+        player.thumbnails(listThumbnails);
+      }
+      
+
       videojs('player').ready(function () {
         this.hotkeys({
           volumeStep: 0.05,
@@ -128,6 +148,7 @@
           enableModifiersForNumbers: false
         });
       });
+
       player.brand({
         branding: !JSON.parse(nobranding),
         title: "Watch on DTube",
@@ -153,15 +174,15 @@
     function findBestUrl(hash, cb) {
       let isFirst = true;
       gateways.forEach((gateway) => {
-        const url = gateway + '/ipfs/'+hash
+        const url = gateway + '/ipfs/' + hash
         const timeStart = new Date()
         const request = new XMLHttpRequest();
         request.open("HEAD", url, true);
-        request.onerror = function(e) {
-          console.log('Error: '+url)
+        request.onerror = function (e) {
+          console.log('Error: ' + url)
         }
-        request.onreadystatechange = function() {
-          if(request.readyState === request.HEADERS_RECEIVED) {
+        request.onreadystatechange = function () {
+          if (request.readyState === request.HEADERS_RECEIVED) {
             if (request.status === 200) {
               const headers = request.getAllResponseHeaders()
               if (headers.includes("content-type: video") && isFirst) {
@@ -182,14 +203,14 @@
           label: '480p',
           type: 'video/mp4',
           hash: a.content.video480hash,
-          src: videoGateway ? videoGateway+'/ipfs/'+a.content.video480hash : canonicalUrl(a.content.video480hash)
+          src: videoGateway ? videoGateway + '/ipfs/' + a.content.video480hash : canonicalUrl(a.content.video480hash)
         })
       }
       qualities.push({
         label: 'Source',
         type: 'video/mp4',
         hash: a.content.videohash,
-        src: videoGateway ? videoGateway+'/ipfs/'+a.content.videohash : canonicalUrl(a.content.videohash)
+        src: videoGateway ? videoGateway + '/ipfs/' + a.content.videohash : canonicalUrl(a.content.videohash)
       })
       return qualities
     }
