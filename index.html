@@ -5,7 +5,7 @@
   <link href="player.css" rel="stylesheet">
   <script src="https://cdn.steemjs.com/lib/latest/steem.min.js"></script>
   <script src="https://vjs.zencdn.net/6.2.7/video.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.98.20/webtorrent.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.98.20/webtorrent.min.js"></script> -->
   <script src="branding.js"></script>
   <script src="persistvolume.js"></script>
   <script src="resolutionswitcher.js"></script>
@@ -55,22 +55,22 @@
           player.updateSrc(qualities)
         })
 
-
+      // DISABLED
       // if there's a magnet link, start torrent in background
-      if (a.content.magnet) {
-        var Torrent = new WebTorrent()
-        Torrent.add(a.content.magnet, function (torrent) {
-          // and switch when torrent is ready  and downloading at fair speed!
-          torrent.on('download', function (bytes) {
-            if (!itLoaded && torrent.downloadSpeed > a.info.filesize / a.info.duration) {
-              itLoaded = true
-              var file = torrent.files[0]
-              var container = document.getElementsByTagName('video')[0]
-              file.renderTo(container)
-            }
-          })
-        })
-      }
+      // if (a.content.magnet) {
+      //   var Torrent = new WebTorrent()
+      //   Torrent.add(a.content.magnet, function (torrent) {
+      //     // and switch when torrent is ready  and downloading at fair speed!
+      //     torrent.on('download', function (bytes) {
+      //       if (!itLoaded && torrent.downloadSpeed > a.info.filesize / a.info.duration) {
+      //         itLoaded = true
+      //         var file = torrent.files[0]
+      //         var container = document.getElementsByTagName('video')[0]
+      //         file.renderTo(container)
+      //       }
+      //     })
+      //   })
+      // }
     });
 
     function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration) {
@@ -127,7 +127,7 @@
         var nFrames = 100
         if (duration < 100) nFrames = Math.floor(duration)
         for (let s = 0; s < nFrames; s++) {
-          var nSeconds = nFrames
+          var nSeconds = s
           if (duration > 100) nSeconds = Math.floor(s*duration/100)
           listThumbnails[nSeconds] = {
             src: canonicalUrl(sprite),
@@ -146,6 +146,11 @@
           seekStep: 5,
           enableModifiersForNumbers: false
         });
+
+        window.onmessage = function(e){
+          if (e.data.seekTo)
+            player.currentTime(e.data.seekTime)
+        }
       });
 
       player.brand({
