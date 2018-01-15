@@ -148,10 +148,8 @@
         });
 
         window.onmessage = function(e){
-          console.log(e)
-          // if (e.data.method == 'seekTo') {
-          //   alert('It works!');
-          // }
+          if (e.data.seekTo)
+            player.currentTime(e.data.seekTime)
         }
       });
 
