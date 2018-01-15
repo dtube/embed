@@ -146,6 +146,13 @@
           seekStep: 5,
           enableModifiersForNumbers: false
         });
+
+        window.onmessage = function(e){
+          console.log(e)
+          // if (e.data.method == 'seekTo') {
+          //   alert('It works!');
+          // }
+        }
       });
 
       player.brand({
