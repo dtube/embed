@@ -127,7 +127,7 @@
         var nFrames = 100
         if (duration < 100) nFrames = Math.floor(duration)
         for (let s = 0; s < nFrames; s++) {
-          var nSeconds = nFrames
+          var nSeconds = s
           if (duration > 100) nSeconds = Math.floor(s*duration/100)
           listThumbnails[nSeconds] = {
             src: canonicalUrl(sprite),
