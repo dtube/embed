@@ -1,3 +1,14 @@
+.video-js-info-panel {
+  background: rgba(28,28,28,0.8);
+  border-radius: 4px;
+  color: #fff;
+  left: 10px;
+  position: absolute;
+  top: 10px;
+  z-index: 64;
+  min-width: 26em;
+}
+
 .video-js .vjs-menu-button-inline.vjs-slider-active,.video-js .vjs-menu-button-inline:focus,.video-js .vjs-menu-button-inline:hover,.video-js.vjs-no-flex .vjs-menu-button-inline {
   width: 10em
 }
