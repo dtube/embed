@@ -683,8 +683,8 @@ body.vjs-full-window {
 
 .vjs-menu li.vjs-menu-item:focus,
 .vjs-menu li.vjs-menu-item:hover {
-    background-color: #73859f;
-    background-color: rgba(115, 133, 159, 0.5);
+    /* background-color: #73859f;
+    background-color: rgba(115, 133, 159, 0.5); */
 }
 
 .vjs-menu li.vjs-selected,
