@@ -616,13 +616,6 @@ a:-webkit-any-link {
     max-height: 15em
 }
 
-
-/* 
-.vjs-workinghover .vjs-menu-button-popup:hover .vjs-menu,
-.vjs-menu-button-popup .vjs-menu.vjs-lock-showing {
-    display: block
-} */
-
 .video-js .vjs-menu-button-inline {
     -webkit-transition: all 0.0s;
     -moz-transition: all 0.0s;

@@ -131,10 +131,9 @@ class SettingsMenuItem extends MenuItem {
      * Hide the sub menu
      */
     hideSubMenu() {
-        if (videojs.dom.hasClass(this.el_, 'open')) {
-            videojs.dom.addClass(this.settingsSubMenuEl_, 'vjs-hidden');
-            videojs.dom.removeClass(this.el_, 'open');
-        }
+        videojs.dom.addClass(this.el_.childNodes[2], 'vjs-hidden');
+        videojs.dom.removeClass(this.el_, 'open');
+        videojs.dom.removeClass(this.el_.childNodes[2].childNodes[0], 'vjs-lock-showing');
     }
 
 }

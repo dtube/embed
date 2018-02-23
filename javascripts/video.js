@@ -20273,9 +20273,11 @@ var Player = function (_Component) {
     // }
 
     // iOS Safari has broken hover handling
-    if (!IS_IOS) {
-      _this.addClass('vjs-workinghover');
-    }
+    // if (!IS_IOS) {
+    //_this.addClass('vjs-workinghover');
+    // }
+
+    var swiftclick = SwiftClick.attach(document.body);
 
     // Make player easily findable by ID
     Player.players[_this.id_] = _this;

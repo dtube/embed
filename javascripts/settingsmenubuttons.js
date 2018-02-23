@@ -44,12 +44,11 @@ class SettingsMenuButton extends MenuButton {
         if (entries) {
 
             const openSubMenu = function() {
+                console.log('test', this.el_.childNodes[2].childNodes[0])
 
-                if (videojs.dom.hasClass(this.el_, 'open')) {
-                    videojs.dom.removeClass(this.el_, 'open');
-                } else {
-                    videojs.dom.addClass(this.el_, 'open');
-                }
+                videojs.dom.removeClass(this.el_.childNodes[2], 'vjs-hidden');
+                videojs.dom.addClass(this.el_, 'open');
+                videojs.dom.addClass(this.el_.childNodes[2].childNodes[0], 'vjs-lock-showing');
 
             };
 

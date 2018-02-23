@@ -650,9 +650,9 @@ body.vjs-full-window {
     cursor: default;
 }
 
-.vjs-workinghover .vjs-menu-button.vjs-disabled:hover .vjs-menu {
-    display: none;
-}
+/* .vjs-workinghover .vjs-menu-button.vjs-disabled:hover .vjs-menu {
+    display: block;
+} */
 
 .vjs-menu .vjs-menu-content {
     display: block;
@@ -690,8 +690,8 @@ body.vjs-full-window {
 .vjs-menu li.vjs-selected,
 .vjs-menu li.vjs-selected:focus,
 .vjs-menu li.vjs-selected:hover {
-    background-color: #fff;
-    color: #2B333F;
+    /* background-color: #fff;
+    color: #2B333F; */
 }
 
 .vjs-menu li.vjs-menu-title {
@@ -725,10 +725,10 @@ body.vjs-full-window {
     max-height: 15em;
 }
 
-.vjs-workinghover .vjs-menu-content:hover .vjs-menu,
+/* .vjs-workinghover .vjs-menu-content:hover .vjs-menu,
 .vjs-menu-button-popup .vjs-menu.vjs-lock-showing {
     display: block;
-}
+} */
 
 .video-js .vjs-menu-button-inline {
     -webkit-transition: all 0.4s;
