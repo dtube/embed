@@ -56,7 +56,7 @@ class SettingsMenuButton extends MenuButton {
             for (let entry of entries) {
 
                 let settingsMenuItem = new SettingsMenuItem(this.player(), this.options_, entry);
-
+                console.log(settingsMenuItem, entry)
                 menu.addChild(settingsMenuItem);
 
                 // Hide children to avoid sub menus stacking on top of each other
@@ -85,4 +85,4 @@ class SettingsMenuButton extends MenuButton {
 SettingsMenuButton.prototype.controlText_ = 'Settings Menu';
 
 Component.registerComponent('SettingsMenuButton', SettingsMenuButton);
-// export default SettingsMenuButton;
+

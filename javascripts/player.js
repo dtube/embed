@@ -102,12 +102,11 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
                 'liveDisplay': {},
                 'flexibleWidthSpacer': {},
                 'progressControl': {},
-                'captionsToogle': {},
                 'settingsMenuButton': {
                     entries: [
-                        'playbackRateMenuButton',
-                        'captionsButton',
-                        //'ResolutionMenuButton'
+                        'PlaybackRateMenuButton',
+                        'CaptionsButton',
+                        'ResolutionMenuButton'
                     ]
                 },
                 'fullscreenToggle': {}
