@@ -4,16 +4,14 @@ gateways = [
 ]
 player = null
 itLoaded = false
-steem.api.setOptions({
-    url: 'wss://rpc.steemliberator.com'
-});
+var client = LightRPC.createClient('https://api.steemit.com')
 var path = window.location.href.split("#!/")[1];
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
 var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
-steem.api.getContent(path.split("/")[0], path.split("/")[1], function(err, b) {
+client.send('get_content', [path.split("/")[0], path.split("/")[1]], function(err, b) {
     if (err) {
         console.log(err)
         return
