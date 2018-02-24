@@ -31,7 +31,9 @@ class SettingsMenuItem extends MenuItem {
         this.subMenu = new SubMenuComponent(this.player(), options);
 
         const update = videojs.bind(this, this.update);
-        setTimeout(update, 150);
+        setTimeout(function() {
+            update
+        }, 150);
     }
 
     /**
@@ -113,14 +115,19 @@ class SettingsMenuItem extends MenuItem {
             }
         }
 
-        console.log(this.subMenu.menu.children())
+        //console.log(this.subMenu.menu.children())
         for (let item of this.subMenu.menu.children()) {
             if (!(item instanceof component)) {
                 continue;
             }
-            // item.on('click', function() {
-            //     console.log('click')
-            // });
+            if (!item.isClickInit) {
+                item.isClickInit = true
+                var menu = this
+                item.on('click', function() {
+                    menu.update()
+                });
+            }
+
         }
     }
 
