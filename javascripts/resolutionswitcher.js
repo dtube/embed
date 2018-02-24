@@ -30,13 +30,6 @@
             }
         });
         ResolutionMenuItem.prototype.handleClick = function(event) {
-            findBestUrl(this.options_.src[0].hash, function(url) {
-                for (let i = 0; i < qualities.length; i++) {
-                    if (qualities[i].label !== this.options_.label) return
-                    qualities[i].src = url
-                }
-                player.updateSrc(qualities)
-            })
             MenuItem.prototype.handleClick.call(this, event);
             this.player_.currentResolution(this.options_.label);
         };
@@ -54,6 +47,7 @@
                 MenuButton.call(this, player, options);
                 this.el().setAttribute('aria-label', 'Quality');
                 this.controlText('Quality');
+                this.controlText_ = 'Quality'
                 this.addClass('vjs-resolution-switcher')
 
                 videojs.dom.addClass(this.label, 'vjs-resolution-button-label');

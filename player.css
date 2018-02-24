@@ -310,6 +310,10 @@
     width: 5em;
 }
 
+.vjs-resolution-switcher {
+    display: none;
+}
+
 .vjs-branding-logo {
     color: white;
     display: block;
