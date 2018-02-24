@@ -18,9 +18,9 @@ class SettingsMenuButton extends MenuButton {
         this.el_.setAttribute('aria-label', 'Settings Menu');
 
         this.on('mouseleave', videojs.bind(this, this.hideChildren));
-        this.on('click', videojs.bind(this.children_[1].children_[0], this.children_[1].children_[0].update));
-        this.on('click', videojs.bind(this.children_[1].children_[1], this.children_[1].children_[1].update));
-        this.on('click', videojs.bind(this.children_[1].children_[2], this.children_[1].children_[2].update));
+        for (let i = 0; i < this.children_[1].children_.length; i++) {
+            this.on('click', videojs.bind(this.children_[1].children_[i], this.children_[1].children_[i].update));
+        }
     }
 
     /**

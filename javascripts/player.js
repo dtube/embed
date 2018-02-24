@@ -79,6 +79,12 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
 
     var video = document.body.appendChild(c);
 
+    var menuEntries = []
+    menuEntries.push('PlaybackRateMenuButton')
+    if (subtitles)
+        menuEntries.push('SubtitlesButton')
+    menuEntries.push('ResolutionMenuButton')
+    
     player = videojs("player", {
         inactivityTimeout: 1000,
         sourceOrder: true,
@@ -97,11 +103,7 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
                 'flexibleWidthSpacer': {},
                 'progressControl': {},
                 'settingsMenuButton': {
-                    entries: [
-                        'PlaybackRateMenuButton',
-                        'SubtitlesButton',
-                        'ResolutionMenuButton'
-                    ]
+                    entries: menuEntries
                 },
                 'fullscreenToggle': {}
             }
