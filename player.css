@@ -17,6 +17,10 @@
     width: 10em
 }
 
+.vjs-user-inactive .vjs-menu-content {
+    display: none!important;
+}
+
 .video-js .vjs-controls-disabled .vjs-big-play-button {
     display: none!important
 }
