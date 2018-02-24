@@ -16067,10 +16067,8 @@ var TextTrackButton = function (_TrackButton) {
     if (!Array.isArray(this.kinds_)) {
       this.kinds_ = [this.kind_];
     }
-
     for (var i = 0; i < tracks.length; i++) {
       var track = tracks[i];
-
       // only add tracks that are of an appropriate kind and have a label
       if (this.kinds_.indexOf(track.kind) > -1) {
 
@@ -16084,7 +16082,6 @@ var TextTrackButton = function (_TrackButton) {
         items.push(item);
       }
     }
-
     return items;
   };
 

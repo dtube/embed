@@ -31,20 +31,7 @@ class SettingsMenuItem extends MenuItem {
         this.subMenu = new SubMenuComponent(this.player(), options);
 
         const update = videojs.bind(this, this.update);
-        // To update the sub menu value on click, setTimeout is needed because
-        // updating the value is not instant
-        const updateAfterTimeout = function() {
-            setTimeout(update, 0);
-        };
-
-        for (let item of this.subMenu.menu.children()) {
-            if (!(item instanceof component)) {
-                continue;
-            }
-            item.on('click', updateAfterTimeout);
-        }
-
-        this.update();
+        setTimeout(update, 150);
     }
 
     /**
@@ -121,9 +108,19 @@ class SettingsMenuItem extends MenuItem {
                 }
                 // Set submenu value based on what item is selected
                 if (subMenuItem.options_.selected || subMenuItem.hasClass('vjs-selected')) {
-                    this.settingsSubMenuValueEl_.innerHTML = subMenuItem.options_.label;
+                    this.settingsSubMenuValueEl_.innerHTML = subMenuItem.options_.label.replace('subtitles ', '');
                 }
             }
+        }
+
+        console.log(this.subMenu.menu.children())
+        for (let item of this.subMenu.menu.children()) {
+            if (!(item instanceof component)) {
+                continue;
+            }
+            // item.on('click', function() {
+            //     console.log('click')
+            // });
         }
     }
 

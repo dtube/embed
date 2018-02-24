@@ -1,14 +1,11 @@
 gateways = [
     "https://ipfs.infura.io",
-    "https://ipfs.io",
-    "https://gateway.ipfs.io",
-    "https://scrappy.i.ipfs.io",
-    "https://chappy.i.ipfs.io"
+    "https://ipfs.io"
 ]
 player = null
 itLoaded = false
 steem.api.setOptions({
-    url: 'https://api.steemit.com'
+    url: 'wss://rpc.steemliberator.com'
 });
 var path = window.location.href.split("#!/")[1];
 var autoplay = (path.split("/")[2] == 'true')
@@ -24,7 +21,7 @@ steem.api.getContent(path.split("/")[0], path.split("/")[1], function(err, b) {
     var a = JSON.parse(b.json_metadata).video;
 
     var qualities = generateQualities(a, videoGateway)
-    createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration)
+    createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
 
     // trying to find something that answers faster than the canonical gateway
     if (!videoGateway)
@@ -54,7 +51,7 @@ steem.api.getContent(path.split("/")[0], path.split("/")[1], function(err, b) {
     // }
 });
 
-function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration) {
+function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration, subtitles) {
     var c = document.createElement("video");
     c.poster = posterUrl;
     c.controls = true;
@@ -68,23 +65,22 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
         }
     });
 
-    //if (captions) {
-    track = document.createElement("track");
-    track.kind = "captions";
-    track.label = "English";
-    track.srclang = "en";
-    track.src = "https://hightouch67.github.io/embed/example-captions.vtt"; // TODO
-    // track.label = captions.label;
-    // track.srclang = captions.srclang;
-    // track.src = canonicalUrl(captions.src);
-    c.appendChild(track);
-    track.addEventListener("load", function() {
-        this.mode = "showing";
-        video.textTracks[0].mode = "showing";
-    });
-    //}
 
-    document.body.appendChild(c);
+
+    // if (subtitles) {
+    //     for (let i = 0; i < subtitles.length; i++) {
+    //         track = document.createElement("track")
+    //         track.kind = "subtitles"
+    //         track.label = subtitles[i].lang
+    //         track.srclang = subtitles[i].lang
+    //         if (i == 0) track.default = true
+    //         track.src = canonicalUrl(subtitles[i].hash)
+    //         c.appendChild(track)
+    //     }
+    // }
+
+    var video = document.body.appendChild(c);
+
     player = videojs("player", {
         inactivityTimeout: 1000,
         sourceOrder: true,
@@ -105,7 +101,7 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
                 'settingsMenuButton': {
                     entries: [
                         'PlaybackRateMenuButton',
-                        'CaptionsButton',
+                        'SubtitlesButton',
                         'ResolutionMenuButton'
                     ]
                 },
@@ -124,7 +120,6 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
             }
         }
     })
-
 
     if (sprite) {
         var listThumbnails = {}
@@ -154,6 +149,18 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
         window.onmessage = function(e) {
             if (e.data.seekTo)
                 player.currentTime(e.data.seekTime)
+        }
+
+        if (subtitles) {
+            for (let i = 0; i < subtitles.length; i++) {
+                player.addRemoteTextTrack({
+                    kind: "subtitles",
+                    src: canonicalUrl(subtitles[i].hash),
+                    srclang: subtitles[i].lang,
+                    label: subtitles[i].lang
+                })
+    
+            }
         }
     });
 

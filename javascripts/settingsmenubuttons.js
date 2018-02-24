@@ -18,6 +18,9 @@ class SettingsMenuButton extends MenuButton {
         this.el_.setAttribute('aria-label', 'Settings Menu');
 
         this.on('mouseleave', videojs.bind(this, this.hideChildren));
+        this.on('click', videojs.bind(this.children_[1].children_[0], this.children_[1].children_[0].update));
+        this.on('click', videojs.bind(this.children_[1].children_[1], this.children_[1].children_[1].update));
+        this.on('click', videojs.bind(this.children_[1].children_[2], this.children_[1].children_[2].update));
     }
 
     /**
@@ -44,18 +47,13 @@ class SettingsMenuButton extends MenuButton {
         if (entries) {
 
             const openSubMenu = function() {
-                console.log('test', this.el_.childNodes[2].childNodes[0])
-
                 videojs.dom.removeClass(this.el_.childNodes[2], 'vjs-hidden');
                 videojs.dom.addClass(this.el_, 'open');
                 videojs.dom.addClass(this.el_.childNodes[2].childNodes[0], 'vjs-lock-showing');
-
             };
 
             for (let entry of entries) {
-
                 let settingsMenuItem = new SettingsMenuItem(this.player(), this.options_, entry);
-                console.log(settingsMenuItem, entry)
                 menu.addChild(settingsMenuItem);
 
                 // Hide children to avoid sub menus stacking on top of each other
