@@ -213,12 +213,37 @@ function findBestUrl(hash, cb) {
 
 function generateQualities(a, videoGateway) {
     var qualities = []
+    // sorted from lowest to highest quality
+    if (a.content.video240hash) {
+        qualities.push({
+            label: '240p',
+            type: 'video/mp4',
+            hash: a.content.video240hash,
+            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video240hash : canonicalUrl(a.content.video240hash)
+        })
+    }
     if (a.content.video480hash) {
         qualities.push({
             label: '480p',
             type: 'video/mp4',
             hash: a.content.video480hash,
             src: videoGateway ? videoGateway + '/ipfs/' + a.content.video480hash : canonicalUrl(a.content.video480hash)
+        })
+    }
+    if (a.content.video720hash) {
+        qualities.push({
+            label: '720p',
+            type: 'video/mp4',
+            hash: a.content.video720hash,
+            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video720hash : canonicalUrl(a.content.video720hash)
+        })
+    }
+    if (a.content.video1080hash) {
+        qualities.push({
+            label: '1080p',
+            type: 'video/mp4',
+            hash: a.content.video1080hash,
+            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video1080hash : canonicalUrl(a.content.video1080hash)
         })
     }
     qualities.push({

@@ -207,8 +207,6 @@
 .video-js .vjs-menu-button-popup .vjs-menu .vjs-menu-content {
     background-color: #111111;
     display: table;
-    /* padding-bottom: .5em; */
-    /* bottom: 0px; */
     float: right;
     position: fixed;
     right: 10px;
@@ -223,14 +221,13 @@
 
 .video-js .vjs-menu-button-popup .vjs-menu .vjs-menu-item,
 .video-js .vjs-menu-button-popup .vjs-menu .vjs-menu-title {
-    /* background-color: #00000091; */
     margin: 0;
     padding: .5em;
     text-align: right!important;
 }
 
 .video-js .vjs-menu-button-popup .vjs-menu .vjs-menu-item.vjs-selected {
-    background-color: #d8d8d8
+    background-color: #212121;
 }
 
 .video-js .vjs-big-play-button {
