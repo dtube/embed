@@ -1,49 +1,45 @@
-// Sass for videojs-settings-menu
-
-.video-js {
-  
-    // This class is added to the video.js element by the plugin by default.
-    &.vjs-settings-menu {
-      display: block;
-    }
-  
-    .vjs-settings-menu {
-      .vjs-menu {
-        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-      }
-      .vjs-menu-content {
-        overflow: inherit;
-      }
-      .vjs-menu-item {
-        text-align: left;
-      }
-      .vjs-settings-sub-menu-value,
-      .vjs-settings-sub-menu-title {
-        display: inline-block;
-        padding: 0 5px;
-      }
-      &.vjs-menu-button-popup > .vjs-menu {
-        width: 17em;
-        left: -10em;
-      }
-      &.vjs-menu-button-popup .vjs-settings-sub-menu .vjs-menu {
-        left: -10em;
-      }
-      .vjs-settings-sub-menu {
-        .vjs-menu-content {
-          bottom: -1.5em;
-          li {
-            font-size: 1em;
-          }
-        }
-        .vjs-menu-item {
-          text-align: center;
-        }
-      }
-    }
-  
-    .vjs-settings-sub-menu-title {
-      width: 8em;
-      text-transform: initial;
-    }
-  }
+// // Sass for videojs-settings-menu
+// .video-js {
+//     // This class is added to the video.js element by the plugin by default.
+//     &.vjs-settings-menu {
+//       display: block;
+//     }
+//     .vjs-settings-menu {
+//       .vjs-menu {
+//         font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+//       }
+//       .vjs-menu-content {
+//         overflow: inherit;
+//       }
+//       .vjs-menu-item {
+//         text-align: left;
+//       }
+//       .vjs-settings-sub-menu-value,
+//       .vjs-settings-sub-menu-title {
+//         display: inline-block;
+//         padding: 0 5px;
+//       }
+//       &.vjs-menu-button-popup > .vjs-menu {
+//         width: 17em;
+//         left: -10em;
+//       }
+//       &.vjs-menu-button-popup .vjs-settings-sub-menu .vjs-menu {
+//         left: -10em;
+//       }
+//       .vjs-settings-sub-menu {
+//         .vjs-menu-content {
+//           bottom: -1.5em;
+//           li {
+//             font-size: 1em;
+//           }
+//         }
+//         .vjs-menu-item {
+//           text-align: center;
+//         }
+//       }
+//     }
+//     .vjs-settings-sub-menu-title {
+//       width: 8em;
+//       text-transform: initial;
+//     }
+//   }
