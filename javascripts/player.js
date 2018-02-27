@@ -200,7 +200,7 @@ function findBestUrl(hash, cb) {
             if (request.readyState === request.HEADERS_RECEIVED) {
                 if (request.status === 200) {
                     const headers = request.getAllResponseHeaders()
-                    if (headers.includes("content-type: video") && isFirst) {
+                    if (headers.toLowerCase().includes("content-type: video") && isFirst) {
                         isFirst = false
                         cb(url)
                     }
