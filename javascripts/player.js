@@ -4,50 +4,53 @@ gateways = [
 ]
 player = null
 itLoaded = false
-var client = LightRPC.createClient('https://api.steemit.com')
+timeout = 1000
+var client = new LightRPC('https://api.steemit.com', {
+    timeout: timeout
+})
 var path = window.location.href.split("#!/")[1];
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
 var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
-client.send('get_content', [path.split("/")[0], path.split("/")[1]], function(err, b) {
-    if (err) {
-        console.log(err)
-        return
-    }
-    var a = JSON.parse(b.json_metadata).video;
+findVideo()
 
-    var qualities = generateQualities(a, videoGateway)
-    createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
 
-    // trying to find something that answers faster than the canonical gateway
-    if (!videoGateway)
-        findBestUrl(qualities[0].hash, function(url) {
-            for (let i = 0; i < qualities.length; i++) {
-                if (qualities[i].label !== qualities[0].label) break
-                qualities[i].src = url
+function findVideo(retries = 3) {
+    client.send('get_content', [path.split("/")[0], path.split("/")[1]], {timeout: timeout}, function(err, b) {
+        if (err) {
+            if (err.message.toString().startsWith('Request has timed out.')) {
+                console.log(err, retries)
+                if (retries>0) {
+                    findVideo(--retries)
+                } else {
+                    console.log('Stopped trying to load')
+                }
             }
-            player.updateSrc(qualities)
-        })
-
-    // DISABLED
-    // if there's a magnet link, start torrent in background
-    // if (a.content.magnet) {
-    //   var Torrent = new WebTorrent()
-    //   Torrent.add(a.content.magnet, function (torrent) {
-    //     // and switch when torrent is ready  and downloading at fair speed!
-    //     torrent.on('download', function (bytes) {
-    //       if (!itLoaded && torrent.downloadSpeed > a.info.filesize / a.info.duration) {
-    //         itLoaded = true
-    //         var file = torrent.files[0]
-    //         var container = document.getElementsByTagName('video')[0]
-    //         file.renderTo(container)
-    //       }
-    //     })
-    //   })
-    // }
-});
+            else
+                console.log(err)
+            return
+        }
+        var a = JSON.parse(b.json_metadata).video;
+    
+        var qualities = generateQualities(a, videoGateway)
+        createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
+    
+        // trying to find something that answers faster than the canonical gateway
+        if (!videoGateway)
+            findBestUrl(qualities[0].hash, function(url) {
+                console.log(url)
+                for (let i = 0; i < qualities.length; i++) {
+                    if (qualities[i].label !== qualities[0].label) break
+                    qualities[i].src = url
+                }
+                player.updateSrc(qualities)
+            })
+    
+    });
+    timeout *= 2
+}
 
 function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration, subtitles) {
     var c = document.createElement("video");
