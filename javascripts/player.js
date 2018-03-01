@@ -66,20 +66,6 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
         }
     });
 
-
-
-    // if (subtitles) {
-    //     for (let i = 0; i < subtitles.length; i++) {
-    //         track = document.createElement("track")
-    //         track.kind = "subtitles"
-    //         track.label = subtitles[i].lang
-    //         track.srclang = subtitles[i].lang
-    //         if (i == 0) track.default = true
-    //         track.src = canonicalUrl(subtitles[i].hash)
-    //         c.appendChild(track)
-    //     }
-    // }
-
     var video = document.body.appendChild(c);
 
     var menuEntries = []
@@ -87,6 +73,12 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
     if (subtitles)
         menuEntries.push('SubtitlesButton')
     menuEntries.push('ResolutionMenuButton')
+
+    var defaultQuality = '480p'
+    var persistedQuality = getStorageItem('dquality');
+    if(persistedQuality !== null){
+      defaultQuality = persistedQuality
+    }
     
     player = videojs("player", {
         inactivityTimeout: 1000,
@@ -116,7 +108,7 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
                 namespace: 'dtube'
             },
             videoJsResolutionSwitcher: {
-                default: qualities[0].label
+                default: defaultQuality
             },
             statistics: {
 

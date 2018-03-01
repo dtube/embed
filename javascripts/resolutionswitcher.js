@@ -32,6 +32,7 @@
         ResolutionMenuItem.prototype.handleClick = function(event) {
             MenuItem.prototype.handleClick.call(this, event);
             this.player_.currentResolution(this.options_.label);
+            setStorageItem('dquality', this.options_.label);
         };
         ResolutionMenuItem.prototype.update = function() {
             var selection = this.player_.currentResolution();
