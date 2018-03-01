@@ -4,7 +4,7 @@ gateways = [
 ]
 player = null
 itLoaded = false
-var client = LightRPC.createClient('https://api.steemit.com')
+var client = LightRPC.('https://api.steemit.com')
 var path = window.location.href.split("#!/")[1];
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
