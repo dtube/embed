@@ -74,9 +74,12 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
         menuEntries.push('SubtitlesButton')
     menuEntries.push('ResolutionMenuButton')
 
-    var defaultQuality = '480p'
+
+    var defaultQuality = qualities[0].label
+    if (hasQuality('480p', qualities))
+        defaultQuality = '480p'
     var persistedQuality = getStorageItem('dquality');
-    if(persistedQuality !== null){
+    if(persistedQuality !== null && hasQuality(persistedQuality, qualities)){
       defaultQuality = persistedQuality
     }
     
@@ -248,4 +251,10 @@ function generateQualities(a, videoGateway) {
         src: videoGateway ? videoGateway + '/ipfs/' + a.content.videohash : canonicalUrl(a.content.videohash)
     })
     return qualities
+}
+
+function hasQuality(label, qualities) {
+    for (let i = 0; i < qualities.length; i++) 
+        if (qualities[i].label == label) return true
+    return false
 }
