@@ -139,7 +139,6 @@ function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration
 
     videojs('player').ready(function() {
         this.hotkeys({
-            volumeStep: 0.05,
             seekStep: 5,
             enableModifiersForNumbers: false
         });
