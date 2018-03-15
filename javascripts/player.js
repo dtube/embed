@@ -1,5 +1,4 @@
 gateways = [
-    "https://ipfs.infura.io",
     "https://ipfs.io"
 ]
 player = null
