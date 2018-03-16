@@ -5,7 +5,7 @@
         var r = this,
             n = r.el(),
             o = document,
-            u = { volumeStep: .1, seekStep: 5, enableMute: !0, enableVolumeScroll: !0, enableFullscreen: !0, enableNumbers: !0, enableJogStyle: !1, alwaysCaptureHotkeys: !1, enableModifiersForNumbers: !0, enableInactiveFocus: !0, skipInitialFocus: !1, playPauseKey: function(e) { return 32 === e.which || 179 === e.which }, rewindKey: function(e) { return 37 === e.which || 177 === e.which }, forwardKey: function(e) { return 39 === e.which || 176 === e.which }, volumeUpKey: function(e) { return 38 === e.which }, volumeDownKey: function(e) { return 40 === e.which }, muteKey: function(e) { return 77 === e.which }, fullscreenKey: function(e) { return 70 === e.which }, customKeys: {} },
+            u = { volumeStep: .1, seekStep: 5, enableMute: !0, enableVolumeScroll: !1, enableFullscreen: !0, enableNumbers: !0, enableJogStyle: !1, alwaysCaptureHotkeys: !1, enableModifiersForNumbers: !0, enableInactiveFocus: !0, skipInitialFocus: !1, playPauseKey: function(e) { return 32 === e.which || 179 === e.which }, rewindKey: function(e) { return 37 === e.which || 177 === e.which }, forwardKey: function(e) { return 39 === e.which || 176 === e.which }, volumeUpKey: function(e) { return 38 === e.which }, volumeDownKey: function(e) { return 40 === e.which }, muteKey: function(e) { return 77 === e.which }, fullscreenKey: function(e) { return 70 === e.which }, customKeys: {} },
             l = e.mergeOptions || e.util.mergeOptions,
             i = (t = l(u, t || {})).volumeStep,
             a = t.seekStep,
