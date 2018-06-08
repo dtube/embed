@@ -1,5 +1,5 @@
 gateways = [
-    "https://ipfs.io"
+    "https://gw.cluster.d.tube"
 ]
 player = null
 itLoaded = false
