@@ -1,5 +1,5 @@
 gateways = [
-    "https://ipfs.io"
+    "https://player.dtube.top"
 ]
 player = null
 itLoaded = false
