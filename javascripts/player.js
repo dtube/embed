@@ -34,27 +34,23 @@ function findVideo(retries = 3) {
         }
         var a = JSON.parse(b.json_metadata).video;
     
-        var qualities = generateQualities(a, videoGateway)
-        createPlayer(canonicalUrl(a.info.snaphash), autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
-    
+        var qualities = generateQualities(a)
+        
         // trying to find something that answers faster than the canonical gateway
-        if (!videoGateway)
-            findBestUrl(qualities[0].hash, function(url) {
-                console.log(url)
-                for (let i = 0; i < qualities.length; i++) {
-                    if (qualities[i].label !== qualities[0].label) break
-                    qualities[i].src = url
-                }
-                player.updateSrc(qualities)
-            })
+        findBestUrl(qualities[0].hash, function(gateway) {
+            console.log('Fastest gw: '+gateway)
+            addQualitiesSource(qualities, gateway)
+            createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
+            //player.updateSrc(qualities)
+        })
     
     });
     timeout *= 2
 }
 
-function createPlayer(posterUrl, autoplay, branding, qualities, sprite, duration, subtitles) {
+function createPlayer(posterHash, autoplay, branding, qualities, sprite, duration, subtitles) {
     var c = document.createElement("video");
-    c.poster = posterUrl;
+    c.poster = 'https://snap1.d.tube/ipfs/'+posterHash;
     c.controls = true;
     c.autoplay = autoplay;
     c.id = "player";
@@ -187,7 +183,6 @@ function findBestUrl(hash, cb) {
     let isFirst = true;
     gateways.forEach((gateway) => {
         const url = gateway + '/ipfs/' + hash
-        const timeStart = new Date()
         const request = new XMLHttpRequest();
         request.open("HEAD", url, true);
         request.onerror = function(e) {
@@ -197,9 +192,10 @@ function findBestUrl(hash, cb) {
             if (request.readyState === request.HEADERS_RECEIVED) {
                 if (request.status === 200) {
                     const headers = request.getAllResponseHeaders()
-                    if (headers.toLowerCase().includes("content-type: video") && isFirst) {
+                    console.log(headers, gateway)
+                    if (isFirst) {
                         isFirst = false
-                        cb(url)
+                        cb(gateway)
                     }
                 }
             }
@@ -208,7 +204,7 @@ function findBestUrl(hash, cb) {
     })
 }
 
-function generateQualities(a, videoGateway) {
+function generateQualities(a) {
     var qualities = []
     // sorted from lowest to highest quality
     if (a.content.video240hash) {
@@ -216,7 +212,6 @@ function generateQualities(a, videoGateway) {
             label: '240p',
             type: 'video/mp4',
             hash: a.content.video240hash,
-            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video240hash : canonicalUrl(a.content.video240hash)
         })
     }
     if (a.content.video480hash) {
@@ -224,7 +219,6 @@ function generateQualities(a, videoGateway) {
             label: '480p',
             type: 'video/mp4',
             hash: a.content.video480hash,
-            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video480hash : canonicalUrl(a.content.video480hash)
         })
     }
     if (a.content.video720hash) {
@@ -232,7 +226,6 @@ function generateQualities(a, videoGateway) {
             label: '720p',
             type: 'video/mp4',
             hash: a.content.video720hash,
-            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video720hash : canonicalUrl(a.content.video720hash)
         })
     }
     if (a.content.video1080hash) {
@@ -240,16 +233,20 @@ function generateQualities(a, videoGateway) {
             label: '1080p',
             type: 'video/mp4',
             hash: a.content.video1080hash,
-            src: videoGateway ? videoGateway + '/ipfs/' + a.content.video1080hash : canonicalUrl(a.content.video1080hash)
         })
     }
     qualities.push({
         label: 'Source',
         type: 'video/mp4',
         hash: a.content.videohash,
-        src: videoGateway ? videoGateway + '/ipfs/' + a.content.videohash : canonicalUrl(a.content.videohash)
     })
     return qualities
+}
+
+function addQualitiesSource(qualities, gateway) {
+    for (let i = 0; i < qualities.length; i++) {
+        qualities[i].src = gateway + '/ipfs/' + qualities[i].hash
+    }
 }
 
 function hasQuality(label, qualities) {
