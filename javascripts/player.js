@@ -1,5 +1,5 @@
 gateways = [
-    "https://player.dtube.top",
+    "https://video.dtube.top",
     "https://ipfs.io"
 ]
 player = null
