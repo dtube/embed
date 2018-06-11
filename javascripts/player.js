@@ -1,7 +1,7 @@
 gateways = [
-    "https://video.dtube.top",
     "https://ipfs.io"
 ]
+shortTermGw = "https://video.dtube.top"
 player = null
 itLoaded = false
 timeout = 1000
@@ -17,6 +17,25 @@ var snapGateway = path.split("/")[5]
 findVideo()
 
 
+function findInShortTerm(hash, cb) {
+    const url = shortTermGw + '/ipfs/' + hash
+    const request = new XMLHttpRequest();
+    request.open("HEAD", url, true);
+    request.onerror = function(e) {
+        console.log('Error: ' + url)
+    }
+    request.onreadystatechange = function() {
+        if (request.readyState === request.HEADERS_RECEIVED) {
+            if (request.status === 200) {
+                const headers = request.getAllResponseHeaders()
+                console.log(headers, shortTermGw)
+                cb(true)
+            }
+        } else cb()
+    }
+    request.send();
+}
+
 function findVideo(retries = 3) {
     client.send('get_content', [path.split("/")[0], path.split("/")[1]], {timeout: timeout}, function(err, b) {
         if (err) {
@@ -28,21 +47,22 @@ function findVideo(retries = 3) {
                     console.log('Stopped trying to load')
                 }
             }
-            else
-                console.log(err)
+            else console.log(err)
+
             return
         }
         var a = JSON.parse(b.json_metadata).video;
     
         var qualities = generateQualities(a)
         
-        // trying to find something that answers faster than the canonical gateway
-        findBestUrl(qualities[0].hash, function(gateway) {
-            console.log('Fastest gw: '+gateway)
-            addQualitiesSource(qualities, gateway)
+        findInShortTerm(qualities[0].hash, function(isAvail) {
+            addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
+
+            // start the player
             createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
-            //player.updateSrc(qualities)
         })
+
+        
     
     });
     timeout *= 2
@@ -179,30 +199,30 @@ function canonicalUrl(ipfsHash) {
     return 'https://' + canonicalGateway(ipfsHash) + '/ipfs/' + ipfsHash
 }
 
-function findBestUrl(hash, cb) {
-    let isFirst = true;
-    gateways.forEach((gateway) => {
-        const url = gateway + '/ipfs/' + hash
-        const request = new XMLHttpRequest();
-        request.open("HEAD", url, true);
-        request.onerror = function(e) {
-            console.log('Error: ' + url)
-        }
-        request.onreadystatechange = function() {
-            if (request.readyState === request.HEADERS_RECEIVED) {
-                if (request.status === 200) {
-                    const headers = request.getAllResponseHeaders()
-                    console.log(headers, gateway)
-                    if (isFirst) {
-                        isFirst = false
-                        cb(gateway)
-                    }
-                }
-            }
-        }
-        request.send();
-    })
-}
+// function findBestUrl(hash, cb) {
+//     let isFirst = true;
+//     gateways.forEach((gateway) => {
+//         const url = gateway + '/ipfs/' + hash
+//         const request = new XMLHttpRequest();
+//         request.open("HEAD", url, true);
+//         request.onerror = function(e) {
+//             console.log('Error: ' + url)
+//         }
+//         request.onreadystatechange = function() {
+//             if (request.readyState === request.HEADERS_RECEIVED) {
+//                 if (request.status === 200) {
+//                     const headers = request.getAllResponseHeaders()
+//                     console.log(headers, gateway)
+//                     if (isFirst) {
+//                         isFirst = false
+//                         cb(gateway)
+//                     }
+//                 }
+//             }
+//         }
+//         request.send();
+//     })
+// }
 
 function generateQualities(a) {
     var qualities = []
