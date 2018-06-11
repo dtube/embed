@@ -30,8 +30,8 @@ function findInShortTerm(hash, cb) {
                 const headers = request.getAllResponseHeaders()
                 console.log(headers, shortTermGw)
                 cb(true)
-            }
-        } else cb()
+            } else cb()
+        }
     }
     request.send();
 }
