@@ -6,8 +6,6 @@ function getCurrentStats() {
         volume: player.volume(),
         resolution: player.videoWidth() + 'x' + player.videoHeight(),
         viewport: window.innerWidth + 'x' + window.innerHeight,
-        quality: player.currentResolution().label,
-        hash: player.currentResolution().sources[0].hash,
         gateway: player.currentSource().src.split('/')[2],
         fileSrc: player.currentSource().src,
         fileType: player.currentSource().type,

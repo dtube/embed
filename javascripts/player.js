@@ -9,6 +9,8 @@ var client = new LightRPC('https://api.steemit.com', {
     timeout: timeout
 })
 var path = window.location.href.split("#!/")[1];
+var videoAuthor = path.split("/")[0]
+var videoPermlink = path.split("/")[1]
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
 var videoGateway = path.split("/")[4]
@@ -37,7 +39,15 @@ function findInShortTerm(hash, cb) {
 }
 
 function findVideo(retries = 3) {
-    client.send('get_content', [path.split("/")[0], path.split("/")[1]], {timeout: timeout}, function(err, b) {
+    if (videoPermlink == 'live') {
+        document.addEventListener("DOMContentLoaded", function() {
+            createLiveStream(autoplay, nobranding) 
+        });
+               
+        return
+    }
+
+    client.send('get_content', [videoAuthor, videoPermlink], {timeout: timeout}, function(err, b) {
         if (err) {
             if (err.message.toString().startsWith('Request has timed out.')) {
                 console.log(err, retries)
@@ -180,7 +190,70 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     player.brand({
         branding: !JSON.parse(nobranding),
         title: "Watch on DTube",
-        destination: "http://d.tube/#!/v/" + path.split("/")[0] + '/' + path.split("/")[1],
+        destination: "http://d.tube/#!/v/" + videoAuthor + '/' + videoPermlink,
+        destinationTarget: "_blank"
+    })
+}
+
+
+function createLiveStream(autoplay, branding) {
+    var c = document.createElement("video");
+    c.controls = true;
+    c.autoplay = autoplay;
+    c.id = "player";
+    c.className = "video-js";
+    c.style = "width:100%;height:100%";
+    c.addEventListener('loadeddata', function() {
+        if (c.readyState >= 3) {
+            itLoaded = true
+        }
+    });
+
+    var video = document.body.appendChild(c);
+    
+    player = videojs("player", {
+        inactivityTimeout: 1000,
+        techOrder: ["html5"],
+        controlBar: {
+            children: {
+                'playToggle': {},
+                'muteToggle': {},
+                'volumeControl': {},
+                'currentTimeDisplay': {},
+                'timeDivider': {},
+                'durationDisplay': {},
+                'liveDisplay': {},
+                'flexibleWidthSpacer': {},
+                'progressControl': {},
+                'fullscreenToggle': {}
+            }
+        },
+        plugins: {
+            persistvolume: {
+                namespace: 'dtube'
+            },
+            statistics: {
+
+            }
+        }
+    })
+
+    player.src({
+        src: 'http://stream.dtube.top:8888/hls/'+videoAuthor+'/index.m3u8',
+        type: 'application/x-mpegURL'
+    })
+
+    videojs('player').ready(function() {
+        this.hotkeys({
+            seekStep: 5,
+            enableModifiersForNumbers: false
+        });
+    });
+
+    player.brand({
+        branding: !JSON.parse(nobranding),
+        title: "Watch on DTube",
+        destination: "http://d.tube/#!/v/" + videoAuthor + '/' + videoPermlink,
         destinationTarget: "_blank"
     })
 }
