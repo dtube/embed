@@ -239,7 +239,7 @@ function createLiveStream(autoplay, branding) {
     })
 
     player.src({
-        src: 'http://stream.dtube.top:8888/hls/'+videoAuthor+'/index.m3u8',
+        src: 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8',
         type: 'application/x-mpegURL'
     })
 
