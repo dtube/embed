@@ -41,7 +41,7 @@ function findInShortTerm(hash, cb) {
 function findVideo(retries = 3) {
     if (videoPermlink == 'live') {
         document.addEventListener("DOMContentLoaded", function() {
-            createLiveStream(autoplay, nobranding) 
+            createLiveStream(autoplay, nobranding, null) 
         });
                
         return
@@ -62,18 +62,18 @@ function findVideo(retries = 3) {
             return
         }
         var a = JSON.parse(b.json_metadata).video;
+        if (a.info.livestream) {
+            createLiveStream(autoplay, nobranding, b)
+        } else {
+            var qualities = generateQualities(a)
+            
+            findInShortTerm(qualities[0].hash, function(isAvail) {
+                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
     
-        var qualities = generateQualities(a)
-        
-        findInShortTerm(qualities[0].hash, function(isAvail) {
-            addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
-
-            // start the player
-            createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
-        })
-
-        
-    
+                // start the player
+                createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
+            })
+        } 
     });
     timeout *= 2
 }
@@ -196,7 +196,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
 }
 
 
-function createLiveStream(autoplay, branding) {
+function createLiveStream(autoplay, branding, content) {
     var c = document.createElement("video");
     c.controls = true;
     c.autoplay = autoplay;
@@ -238,10 +238,56 @@ function createLiveStream(autoplay, branding) {
         }
     })
 
-    player.src({
-        src: 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8',
-        type: 'application/x-mpegURL'
-    })
+    if (content) {
+        var request = new XMLHttpRequest();
+        var unix_timestamp = Date.parse(content.created+'Z')/1000
+        request.open('GET', 'https://stream.dtube.top:3000/oldStream/'+content.author+'/'+unix_timestamp, true);
+        request.onload = function() {
+            if (request.status >= 200 && request.status < 400) {
+                var data = JSON.parse(request.responseText)
+                if (data[0][0])
+                    var d0 = Math.abs(unix_timestamp - data[0][0].timeStart)
+                if (data[1][0])
+                    var d1 = Math.abs(unix_timestamp - data[1][0].timeStart)
+                var dn = Math.abs(+new Date()/1000 - unix_timestamp)
+                if (d1<d0) {
+                    d0 = d1
+                    data[0][0] = data[1][0]
+                }
+                if (d0 && d0 < 5*60 && dn > 60*60) {
+                    console.log('playing old stream video', d0)
+                    videosrc = 'https://video.dtube.top/streams/'+data[0][0].filePath
+                    player.src(videosrc)
+                    return
+                }
+                var livesrc = 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8'
+                player.src({
+                    src: livesrc,
+                    type: 'application/x-mpegURL'
+                })
+                player.on('error', function(event) {
+                    console.log('playing old stream video', d0)
+                    videosrc = 'https://video.dtube.top/streams/'+data[0][0].filePath
+                    player.src(videosrc)
+                })
+                
+            } else {
+                console.log('Error stream API')
+            }
+        };
+        
+        request.onerror = function() {
+            console.log('Error stream API')
+        };
+        
+        request.send();
+    } else {
+        var livesrc = 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8'
+        player.src({
+            src: livesrc,
+            type: 'application/x-mpegURL'
+        })
+    }
 
     videojs('player').ready(function() {
         this.hotkeys({
