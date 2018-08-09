@@ -254,7 +254,7 @@ function createLiveStream(autoplay, branding, content) {
                     d0 = d1
                     data[0][0] = data[1][0]
                 }
-                if (d0 && d0 < 5*60 && dn > 60*60) {
+                if (d0 && d0 < 5*60 && dn > 6*60*60) {
                     console.log('playing old stream video', d0)
                     videosrc = 'https://video.dtube.top/streams/'+data[0][0].filePath
                     player.src(videosrc)
