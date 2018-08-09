@@ -250,7 +250,7 @@ function createLiveStream(autoplay, branding, content) {
                 if (data[1][0])
                     var d1 = Math.abs(unix_timestamp - data[1][0].timeStart)
                 var dn = Math.abs(+new Date()/1000 - unix_timestamp)
-                if (d1<d0) {
+                if (d1<d0 || !data[0][0]) {
                     d0 = d1
                     data[0][0] = data[1][0]
                 }
