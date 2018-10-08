@@ -1,5 +1,5 @@
 gateways = [
-    "https://ipfs.io"
+    "https://cloudflare-ipfs.com/"
 ]
 shortTermGw = "https://video.dtube.top"
 player = null
