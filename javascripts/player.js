@@ -1,7 +1,7 @@
 gateways = [
-    "https://ipfs.io"
+    "ipfs.io"
 ]
-shortTermGw = "https://video.dtube.top"
+shortTermGatewayHost = "video.dtube.top"
 player = null
 itLoaded = false
 timeout = 1000
@@ -19,31 +19,43 @@ var snapGateway = path.split("/")[5]
 findVideo()
 
 
-function findInShortTerm(hash, cb) {
-    const url = shortTermGw + '/ipfs/' + hash
-    const request = new XMLHttpRequest();
-    request.open("HEAD", url, true);
-    request.onerror = function(e) {
-        console.log('Error: ' + url)
-    }
-    request.onreadystatechange = function() {
-        if (request.readyState === request.HEADERS_RECEIVED) {
-            if (request.status === 200) {
-                const headers = request.getAllResponseHeaders()
-                console.log(headers, shortTermGw)
-                cb(true)
-            } else cb()
+function findInShortTerm(quality) {
+    return new Promise(function(resolve, reject) {
+        const url = generateGatewayUrl(shortTermGatewayHost, quality.hash)
+        const request = new XMLHttpRequest();
+
+        // Assume not available if it's timing out
+        request.timeout = 5000;
+        request.ontimeout = function (e) {
+            reject(quality)
+        };
+
+        request.open("HEAD", url, true);
+        request.onerror = function(e) {
+            console.log('Error: ' + url)
+            reject(quality)
         }
-    }
-    request.send();
+        request.onreadystatechange = function() {
+            if (request.readyState === request.HEADERS_RECEIVED) {
+                if (request.status === 200) {
+                    const headers = request.getAllResponseHeaders()
+                    console.log(headers, shortTermGatewayHost)
+                    resolve(quality)
+                } else {
+                    reject(quality)
+                }
+            }
+        }
+        request.send();
+    })
 }
 
 function findVideo(retries = 3) {
     if (videoPermlink == 'live') {
         document.addEventListener("DOMContentLoaded", function() {
-            createLiveStream(autoplay, nobranding, null) 
+            createLiveStream(autoplay, nobranding, null)
         });
-               
+
         return
     }
 
@@ -66,16 +78,73 @@ function findVideo(retries = 3) {
             createLiveStream(autoplay, nobranding, b)
         } else {
             var qualities = generateQualities(a)
-            
-            findInShortTerm(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
-    
-                // start the player
-                createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
-            })
-        } 
+
+            checkQualityAvailabilityInShortTerm(qualities)
+                .then(function(qualities) {
+                    addQualitiesSource(qualities, shortTermGatewayHost)
+
+                    // start the player
+                    createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
+                })
+                .catch(function(e) {
+                    console.error(e.message);
+                })
+        }
     });
     timeout *= 2
+}
+
+/**
+ * Waiting for all promises to complete with a resolve or reject
+ * @param arr
+ * @returns {*}
+ */
+function settlePromises(arr){
+    return Promise.all(arr.map(promise => {
+        return promise.then(
+            value => ({state: 'resolved', value}),
+            value => ({state: 'rejected', value})
+        );
+    }));
+}
+
+/**
+ * Checks if the file for each quality is available in short term gateway and mark the status
+ * @param qualities
+ * @returns {Promise}
+ */
+function checkQualityAvailabilityInShortTerm(qualities) {
+    return new Promise(function(resolve, reject) {
+        var checkPromises = [];
+
+        try {
+            for (var qi = 0; qi < qualities.length; qi++) {
+                var quality = qualities[qi]
+                checkPromises.push(findInShortTerm(quality))
+            }
+        } catch(e) {
+            reject(e)
+        }
+
+        settlePromises(checkPromises).then(function(results) {
+            var qualities = []
+
+            for (let ri=0; ri<results.length; ri++) {
+                var result = results[ri];
+                var quality = result.value
+
+                if (result.state === 'resolved') {
+                    quality.availOnShortTerm = true
+                } else {
+                    quality.availOnShortTerm = false
+                }
+
+                qualities.push(quality)
+            }
+
+            resolve(qualities);
+        })
+    })
 }
 
 function createPlayer(posterHash, autoplay, branding, qualities, sprite, duration, subtitles) {
@@ -108,7 +177,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     if(persistedQuality !== null && hasQuality(persistedQuality, qualities)){
       defaultQuality = persistedQuality
     }
-    
+
     player = videojs("player", {
         inactivityTimeout: 1000,
         sourceOrder: true,
@@ -182,7 +251,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
                     srclang: subtitles[i].lang,
                     label: subtitles[i].lang
                 })
-    
+
             }
         }
     });
@@ -210,7 +279,7 @@ function createLiveStream(autoplay, branding, content) {
     });
 
     var video = document.body.appendChild(c);
-    
+
     player = videojs("player", {
         inactivityTimeout: 1000,
         techOrder: ["html5"],
@@ -270,16 +339,16 @@ function createLiveStream(autoplay, branding, content) {
                     videosrc = 'https://video.dtube.top/streams/'+data[0][0].filePath
                     player.src(videosrc)
                 })
-                
+
             } else {
                 console.log('Error stream API')
             }
         };
-        
+
         request.onerror = function() {
             console.log('Error stream API')
         };
-        
+
         request.send();
     } else {
         var livesrc = 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8'
@@ -311,11 +380,15 @@ function removePlayer() {
 
 function canonicalGateway(ipfsHash) {
     var g = ipfsHash.charCodeAt(ipfsHash.length - 1) % gateways.length
-    return gateways[g].split('://')[1]
+    return gateways[g]
 }
 
 function canonicalUrl(ipfsHash) {
-    return 'https://' + canonicalGateway(ipfsHash) + '/ipfs/' + ipfsHash
+    return generateGatewayUrl(canonicalGateway(ipfsHash), ipfsHash)
+}
+
+function generateGatewayUrl(hostname, ipfsHash) {
+    return '//' + hostname + '/ipfs/' + ipfsHash
 }
 
 // function findBestUrl(hash, cb) {
@@ -382,14 +455,18 @@ function generateQualities(a) {
     return qualities
 }
 
-function addQualitiesSource(qualities, gateway) {
-    for (let i = 0; i < qualities.length; i++) {
-        qualities[i].src = gateway + '/ipfs/' + qualities[i].hash
+function addQualitiesSource(qualities, shortTermGatewayHost) {
+    for (let qi = 0; qi < qualities.length; qi++) {
+        var quality = qualities[qi]
+        var gatewayUrl = generateGatewayUrl(shortTermGatewayHost, quality.hash)
+        var fallbackGatewayUrl = canonicalUrl(quality.hash)
+
+        quality.src = quality.availOnShortTerm ? gatewayUrl : fallbackGatewayUrl
     }
 }
 
 function hasQuality(label, qualities) {
-    for (let i = 0; i < qualities.length; i++) 
+    for (let i = 0; i < qualities.length; i++)
         if (qualities[i].label == label) return true
     return false
 }
