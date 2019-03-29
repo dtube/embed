@@ -1,13 +1,16 @@
 gateways = [
-    "https://ipfs.io"
+    "https://ipfs.io",
+    "https://video.dtube.network/"
+]
+steemAPI = [
+    "https://api.steemit.com/",
+    "https://steemd.minnowsupportproject.org/",
+    "https://anyx.io/",
 ]
 shortTermGw = "https://video.dtube.top"
 player = null
 itLoaded = false
-timeout = 1000
-var client = new LightRPC('https://api.steemit.com', {
-    timeout: timeout
-})
+timeout = 1500
 var path = window.location.href.split("#!/")[1];
 var videoAuthor = path.split("/")[0]
 var videoPermlink = path.split("/")[1]
@@ -46,21 +49,21 @@ function findVideo(retries = 3) {
                
         return
     }
-
+    var api = steemAPI[(3-retries)%steemAPI.length]
+    var client = new LightRPC(api, {
+        timeout: timeout
+    })
     client.send('get_content', [videoAuthor, videoPermlink], {timeout: timeout}, function(err, b) {
         if (err) {
-            if (err.message.toString().startsWith('Request has timed out.')) {
-                console.log(err, retries)
-                if (retries>0) {
-                    findVideo(--retries)
-                } else {
-                    console.log('Stopped trying to load')
-                }
+            console.log(retries, api, err)
+            if (retries>0) {
+                findVideo(--retries)
+            } else {
+                console.log('Stopped trying to load (tried too much)')
             }
-            else console.log(err)
-
             return
         }
+        console.log('Video loaded from '+api, b)
         var a = JSON.parse(b.json_metadata).video;
         if (a.info.livestream) {
             createLiveStream(autoplay, nobranding, b)
