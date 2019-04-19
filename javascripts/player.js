@@ -1,6 +1,6 @@
 gateways = [
     "https://ipfs.io",
-    "https://video.dtube.network/"
+    "https://video.dtube.network"
 ]
 steemAPI = [
     "https://api.steemit.com/",
