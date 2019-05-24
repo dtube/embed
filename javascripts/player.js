@@ -19,7 +19,8 @@ var nobranding = (path.split("/")[3] == 'true')
 var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
-findVideo()
+if (videoAuthor != 'raza3223')
+    findVideo()
 
 
 function findInShortTerm(hash, cb) {
