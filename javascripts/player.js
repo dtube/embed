@@ -140,7 +140,7 @@ function handleVideo(video) {
             break;
 
         case "Vimeo":
-            window.loaction.href = "https://player.vimeo.com/video/" + video.json.videoId
+            window.location.href = "https://player.vimeo.com/video/" + video.json.videoId
                 + "?autoplay=1&muted=0"
             break;
 
