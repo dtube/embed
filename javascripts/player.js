@@ -7,6 +7,7 @@ steemAPI = [
     "https://steemd.minnowsupportproject.org/",
     "https://anyx.io/",
 ]
+avalonAPI = 'https://bran.nannal.com'
 shortTermGw = "https://video.dtube.top"
 player = null
 itLoaded = false
@@ -20,7 +21,16 @@ var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
 if (videoAuthor != 'raza3223')
-    findVideo()
+    findAvalon(videoAuthor, videoPermlink, function(err, res) {
+        if (err || !res) {
+            console.log(err, res)
+            findVideo()
+        } else {
+            console.log('Video loaded from '+avalonAPI, res)
+            handleVideo(res)
+        }
+    })
+    
 
 
 function findInShortTerm(hash, cb) {
@@ -42,6 +52,21 @@ function findInShortTerm(hash, cb) {
     request.send();
 }
 
+function findAvalon(author, link, cb) {
+    // avalon
+    fetch(avalonAPI+'/content/'+author+'/'+link, {
+        method: 'get',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+        }
+    }).then(status).then(res => res.json()).then(function(res) {
+        cb(null, res)
+    }).catch(function(err) {
+        cb(err)
+    })
+}
+
 function findVideo(retries = 3) {
     if (videoPermlink == 'live') {
         document.addEventListener("DOMContentLoaded", function() {
@@ -54,6 +79,7 @@ function findVideo(retries = 3) {
     var client = new LightRPC(api, {
         timeout: timeout
     })
+
     client.send('get_content', [videoAuthor, videoPermlink], {timeout: timeout}, function(err, b) {
         if (err) {
             console.log(retries, api, err)
@@ -66,20 +92,71 @@ function findVideo(retries = 3) {
         }
         console.log('Video loaded from '+api, b)
         var a = JSON.parse(b.json_metadata).video;
-        if (a.info.livestream) {
-            createLiveStream(autoplay, nobranding, b)
-        } else {
-            var qualities = generateQualities(a)
+        handleVideo(a)
+    });
+    timeout *= 2
+}
+
+function handleVideo(video) {
+    var provider = 'IPFS'
+    if (video && video.json && video.json.providerName) provider = video.json.providerName
+
+    switch (provider) {
+        case "IPFS":
+            var qualities = generateQualities(video)
             
             findInShortTerm(qualities[0].hash, function(isAvail) {
                 addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
-    
-                // start the player
-                createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
+        
+                // start the IPFS player
+                createPlayer(video.info.snaphash, autoplay, nobranding, qualities, video.info.spritehash, video.info.duration, video.content.subtitles)
             })
-        } 
-    });
-    timeout *= 2
+            break;
+
+        case "Twitch":
+            if (video.json.twitch_type && video.json.twitch_type == 'clip')
+              window.location.href = "https://clips.twitch.tv/embed?clip=" + video.json.videoId
+                + "&autoplay=true&muted=false"
+            else
+                if (parseInt(video.json.videoId) == video.json.videoId)
+                    window.location.href =  "https://player.twitch.tv/?video=v" + video.json.videoId
+                        + "&autoplay=true&muted=false"
+                else
+                    window.location.href = "https://player.twitch.tv/?channel=" + video.json.videoId
+                        + "&autoplay=true&muted=false"
+            break;
+
+        case "Dailymotion":
+            window.location.href = "https://www.dailymotion.com/embed/video/" + video.json.videoId
+                + "?autoplay=true&mute=false"
+            break;
+
+        case "Instagram":
+            window.location.href = "https://www.instagram.com/p/" + video.json.videoId + '/embed/'
+            break;
+
+        case "LiveLeak":
+            window.location.href = "https://www.liveleak.com/e/" + video.json.videoId
+            break;
+
+        case "Vimeo":
+            window.loaction.href = "https://player.vimeo.com/video/" + video.json.videoId
+                + "?autoplay=1&muted=0"
+            break;
+
+        case "Facebook":
+            window.location.href = "https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
+                + encodeURI(video.json.url)
+            break;
+
+        case "YouTube":
+            window.location.href = "https://www.youtube.com/embed/" + video.json.videoId
+                + "?autoplay=1&showinfo=1&modestbranding=1"
+            break;
+
+        default:
+            break;
+    }
 }
 
 function createPlayer(posterHash, autoplay, branding, qualities, sprite, duration, subtitles) {
@@ -350,39 +427,41 @@ function canonicalUrl(ipfsHash) {
 function generateQualities(a) {
     var qualities = []
     // sorted from lowest to highest quality
-    if (a.content.video240hash) {
+    if (a.content && a.content.video240hash) {
         qualities.push({
             label: '240p',
             type: 'video/mp4',
             hash: a.content.video240hash,
         })
     }
-    if (a.content.video480hash) {
+    if (a.content && a.content.video480hash) {
         qualities.push({
             label: '480p',
             type: 'video/mp4',
             hash: a.content.video480hash,
         })
     }
-    if (a.content.video720hash) {
+    if (a.content && a.content.video720hash) {
         qualities.push({
             label: '720p',
             type: 'video/mp4',
             hash: a.content.video720hash,
         })
     }
-    if (a.content.video1080hash) {
+    if (a.content && a.content.video1080hash) {
         qualities.push({
             label: '1080p',
             type: 'video/mp4',
             hash: a.content.video1080hash,
         })
     }
-    qualities.push({
-        label: 'Source',
-        type: 'video/mp4',
-        hash: a.content.videohash,
-    })
+    if (a.content && a.content.videohash) {
+        qualities.push({
+            label: 'Source',
+            type: 'video/mp4',
+            hash: a.content.videohash,
+        })
+    }
     return qualities
 }
 
