@@ -27,7 +27,7 @@ if (videoAuthor != 'raza3223')
             findVideo()
         } else {
             console.log('Video loaded from '+avalonAPI, res)
-            handleVideo(res)
+            handleVideo(res.json)
         }
     })
     
@@ -99,58 +99,74 @@ function findVideo(retries = 3) {
 
 function handleVideo(video) {
     var provider = 'IPFS'
-    if (video && video.json && video.json.providerName) provider = video.json.providerName
+    if (video && video.providerName) provider = video.providerName
 
     switch (provider) {
         case "IPFS":
             var qualities = generateQualities(video)
-            
             findInShortTerm(qualities[0].hash, function(isAvail) {
                 addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
         
                 // start the IPFS player
-                createPlayer(video.info.snaphash, autoplay, nobranding, qualities, video.info.spritehash, video.info.duration, video.content.subtitles)
+                var snapHash = ''
+                if (video.info && video.info.snaphash) snapHash = video.info.snaphash
+                if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
+
+                var spriteHash = ''
+                if (video.info && video.info.spriteHash) spriteHash = video.info.spriteHash
+                if (video.content && video.content.spriteHash) spriteHash = video.content.spriteHash
+                if (video.ipfs && video.ipfs.spriteHash) spriteHash = video.ipfs.spriteHash
+
+                var duration = 0
+                if (video.info && video.info.duration) duration = video.info.duration
+                if (video.duration) duration = video.duration
+
+                var subtitles = null
+                if (video.content && video.content.subtitles) subtitles = video.content.subtitles
+                if (video.ipfs && video.ipfs.subtitles) subtitles = video.ipfs.subtitles
+
+                createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
             })
             break;
 
         case "Twitch":
-            if (video.json.twitch_type && video.json.twitch_type == 'clip')
-              window.location.href = "https://clips.twitch.tv/embed?clip=" + video.json.videoId
+            if (video.twitch_type && video.twitch_type == 'clip')
+              window.location.href = "https://clips.twitch.tv/embed?clip=" + video.videoId
                 + "&autoplay=true&muted=false"
             else
-                if (parseInt(video.json.videoId) == video.json.videoId)
-                    window.location.href =  "https://player.twitch.tv/?video=v" + video.json.videoId
+                if (parseInt(video.videoId) == video.videoId)
+                    window.location.href =  "https://player.twitch.tv/?video=v" + video.videoId
                         + "&autoplay=true&muted=false"
                 else
-                    window.location.href = "https://player.twitch.tv/?channel=" + video.json.videoId
+                    window.location.href = "https://player.twitch.tv/?channel=" + video.videoId
                         + "&autoplay=true&muted=false"
             break;
 
         case "Dailymotion":
-            window.location.href = "https://www.dailymotion.com/embed/video/" + video.json.videoId
+            window.location.href = "https://www.dailymotion.com/embed/video/" + video.videoId
                 + "?autoplay=true&mute=false"
             break;
 
         case "Instagram":
-            window.location.href = "https://www.instagram.com/p/" + video.json.videoId + '/embed/'
+            window.location.href = "https://www.instagram.com/p/" + video.videoId + '/embed/'
             break;
 
         case "LiveLeak":
-            window.location.href = "https://www.liveleak.com/e/" + video.json.videoId
+            window.location.href = "https://www.liveleak.com/e/" + video.videoId
             break;
 
         case "Vimeo":
-            window.loaction.href = "https://player.vimeo.com/video/" + video.json.videoId
+            window.loaction.href = "https://player.vimeo.com/video/" + video.videoId
                 + "?autoplay=1&muted=0"
             break;
 
         case "Facebook":
             window.location.href = "https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
-                + encodeURI(video.json.url)
+                + encodeURI(video.url)
             break;
 
         case "YouTube":
-            window.location.href = "https://www.youtube.com/embed/" + video.json.videoId
+            window.location.href = "https://www.youtube.com/embed/" + video.videoId
                 + "?autoplay=1&showinfo=1&modestbranding=1"
             break;
 
@@ -427,40 +443,78 @@ function canonicalUrl(ipfsHash) {
 function generateQualities(a) {
     var qualities = []
     // sorted from lowest to highest quality
-    if (a.content && a.content.video240hash) {
-        qualities.push({
-            label: '240p',
-            type: 'video/mp4',
-            hash: a.content.video240hash,
-        })
-    }
-    if (a.content && a.content.video480hash) {
-        qualities.push({
-            label: '480p',
-            type: 'video/mp4',
-            hash: a.content.video480hash,
-        })
-    }
-    if (a.content && a.content.video720hash) {
-        qualities.push({
-            label: '720p',
-            type: 'video/mp4',
-            hash: a.content.video720hash,
-        })
-    }
-    if (a.content && a.content.video1080hash) {
-        qualities.push({
-            label: '1080p',
-            type: 'video/mp4',
-            hash: a.content.video1080hash,
-        })
-    }
-    if (a.content && a.content.videohash) {
-        qualities.push({
-            label: 'Source',
-            type: 'video/mp4',
-            hash: a.content.videohash,
-        })
+    if (a.ipfs) {
+        if (a.ipfs.video240hash) {
+            qualities.push({
+                label: '240p',
+                type: 'video/mp4',
+                hash: a.ipfs.video240hash,
+            })
+        }
+        if (a.ipfs.video480hash) {
+            qualities.push({
+                label: '480p',
+                type: 'video/mp4',
+                hash: a.ipfs.video480hash,
+            })
+        }
+        if (a.ipfs.video720hash) {
+            qualities.push({
+                label: '720p',
+                type: 'video/mp4',
+                hash: a.ipfs.video720hash,
+            })
+        }
+        if (a.ipfs.video1080hash) {
+            qualities.push({
+                label: '1080p',
+                type: 'video/mp4',
+                hash: a.ipfs.video1080hash,
+            })
+        }
+        if (a.ipfs.videohash) {
+            qualities.push({
+                label: 'Source',
+                type: 'video/mp4',
+                hash: a.ipfs.videohash,
+            })
+        }
+    } else {
+        if (a.content && a.content.video240hash) {
+            qualities.push({
+                label: '240p',
+                type: 'video/mp4',
+                hash: a.content.video240hash,
+            })
+        }
+        if (a.content && a.content.video480hash) {
+            qualities.push({
+                label: '480p',
+                type: 'video/mp4',
+                hash: a.content.video480hash,
+            })
+        }
+        if (a.content && a.content.video720hash) {
+            qualities.push({
+                label: '720p',
+                type: 'video/mp4',
+                hash: a.content.video720hash,
+            })
+        }
+        if (a.content && a.content.video1080hash) {
+            qualities.push({
+                label: '1080p',
+                type: 'video/mp4',
+                hash: a.content.video1080hash,
+            })
+        }
+        if (a.content && a.content.videohash) {
+            qualities.push({
+                label: 'Source',
+                type: 'video/mp4',
+                hash: a.content.videohash,
+            })
+        }
     }
     return qualities
 }
