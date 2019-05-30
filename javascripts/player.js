@@ -7,6 +7,7 @@ steemAPI = [
     "https://steemd.minnowsupportproject.org/",
     "https://anyx.io/",
 ]
+avalonAPI = 'https://bran.nannal.com'
 shortTermGw = "https://video.dtube.top"
 player = null
 itLoaded = false
@@ -20,7 +21,16 @@ var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
 if (videoAuthor != 'raza3223')
-    findVideo()
+    findAvalon(videoAuthor, videoPermlink, function(err, res) {
+        if (err || !res) {
+            console.log(err, res)
+            findVideo()
+        } else {
+            console.log('Video loaded from '+avalonAPI, res)
+            handleVideo(res.json)
+        }
+    })
+    
 
 
 function findInShortTerm(hash, cb) {
@@ -42,6 +52,21 @@ function findInShortTerm(hash, cb) {
     request.send();
 }
 
+function findAvalon(author, link, cb) {
+    // avalon
+    fetch(avalonAPI+'/content/'+author+'/'+link, {
+        method: 'get',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+        }
+    }).then(status).then(res => res.json()).then(function(res) {
+        cb(null, res)
+    }).catch(function(err) {
+        cb(err)
+    })
+}
+
 function findVideo(retries = 3) {
     if (videoPermlink == 'live') {
         document.addEventListener("DOMContentLoaded", function() {
@@ -54,6 +79,7 @@ function findVideo(retries = 3) {
     var client = new LightRPC(api, {
         timeout: timeout
     })
+
     client.send('get_content', [videoAuthor, videoPermlink], {timeout: timeout}, function(err, b) {
         if (err) {
             console.log(retries, api, err)
@@ -66,20 +92,87 @@ function findVideo(retries = 3) {
         }
         console.log('Video loaded from '+api, b)
         var a = JSON.parse(b.json_metadata).video;
-        if (a.info.livestream) {
-            createLiveStream(autoplay, nobranding, b)
-        } else {
-            var qualities = generateQualities(a)
-            
-            findInShortTerm(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
-    
-                // start the player
-                createPlayer(a.info.snaphash, autoplay, nobranding, qualities, a.info.spritehash, a.info.duration, a.content.subtitles)
-            })
-        } 
+        handleVideo(a)
     });
     timeout *= 2
+}
+
+function handleVideo(video) {
+    var provider = 'IPFS'
+    if (video && video.providerName) provider = video.providerName
+
+    switch (provider) {
+        case "IPFS":
+            var qualities = generateQualities(video)
+            findInShortTerm(qualities[0].hash, function(isAvail) {
+                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
+        
+                // start the IPFS player
+                var snapHash = ''
+                if (video.info && video.info.snaphash) snapHash = video.info.snaphash
+                if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
+
+                var spriteHash = ''
+                if (video.info && video.info.spriteHash) spriteHash = video.info.spriteHash
+                if (video.content && video.content.spriteHash) spriteHash = video.content.spriteHash
+                if (video.ipfs && video.ipfs.spriteHash) spriteHash = video.ipfs.spriteHash
+
+                var duration = 0
+                if (video.info && video.info.duration) duration = video.info.duration
+                if (video.duration) duration = video.duration
+
+                var subtitles = null
+                if (video.content && video.content.subtitles) subtitles = video.content.subtitles
+                if (video.ipfs && video.ipfs.subtitles) subtitles = video.ipfs.subtitles
+
+                createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
+            })
+            break;
+
+        case "Twitch":
+            if (video.twitch_type && video.twitch_type == 'clip')
+              window.location.href = "https://clips.twitch.tv/embed?clip=" + video.videoId
+                + "&autoplay=true&muted=false"
+            else
+                if (parseInt(video.videoId) == video.videoId)
+                    window.location.href =  "https://player.twitch.tv/?video=v" + video.videoId
+                        + "&autoplay=true&muted=false"
+                else
+                    window.location.href = "https://player.twitch.tv/?channel=" + video.videoId
+                        + "&autoplay=true&muted=false"
+            break;
+
+        case "Dailymotion":
+            window.location.href = "https://www.dailymotion.com/embed/video/" + video.videoId
+                + "?autoplay=true&mute=false"
+            break;
+
+        case "Instagram":
+            window.location.href = "https://www.instagram.com/p/" + video.videoId + '/embed/'
+            break;
+
+        case "LiveLeak":
+            window.location.href = "https://www.liveleak.com/e/" + video.videoId
+            break;
+
+        case "Vimeo":
+            window.loaction.href = "https://player.vimeo.com/video/" + video.videoId
+                + "?autoplay=1&muted=0"
+            break;
+
+        case "Facebook":
+            window.location.href = "https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
+                + encodeURI(video.url)
+            break;
+
+        case "YouTube":
+            window.location.href = "https://www.youtube.com/embed/" + video.videoId
+                + "?autoplay=1&showinfo=1&modestbranding=1"
+            break;
+
+        default:
+            break;
+    }
 }
 
 function createPlayer(posterHash, autoplay, branding, qualities, sprite, duration, subtitles) {
@@ -350,39 +443,79 @@ function canonicalUrl(ipfsHash) {
 function generateQualities(a) {
     var qualities = []
     // sorted from lowest to highest quality
-    if (a.content.video240hash) {
-        qualities.push({
-            label: '240p',
-            type: 'video/mp4',
-            hash: a.content.video240hash,
-        })
+    if (a.ipfs) {
+        if (a.ipfs.video240hash) {
+            qualities.push({
+                label: '240p',
+                type: 'video/mp4',
+                hash: a.ipfs.video240hash,
+            })
+        }
+        if (a.ipfs.video480hash) {
+            qualities.push({
+                label: '480p',
+                type: 'video/mp4',
+                hash: a.ipfs.video480hash,
+            })
+        }
+        if (a.ipfs.video720hash) {
+            qualities.push({
+                label: '720p',
+                type: 'video/mp4',
+                hash: a.ipfs.video720hash,
+            })
+        }
+        if (a.ipfs.video1080hash) {
+            qualities.push({
+                label: '1080p',
+                type: 'video/mp4',
+                hash: a.ipfs.video1080hash,
+            })
+        }
+        if (a.ipfs.videohash) {
+            qualities.push({
+                label: 'Source',
+                type: 'video/mp4',
+                hash: a.ipfs.videohash,
+            })
+        }
+    } else {
+        if (a.content && a.content.video240hash) {
+            qualities.push({
+                label: '240p',
+                type: 'video/mp4',
+                hash: a.content.video240hash,
+            })
+        }
+        if (a.content && a.content.video480hash) {
+            qualities.push({
+                label: '480p',
+                type: 'video/mp4',
+                hash: a.content.video480hash,
+            })
+        }
+        if (a.content && a.content.video720hash) {
+            qualities.push({
+                label: '720p',
+                type: 'video/mp4',
+                hash: a.content.video720hash,
+            })
+        }
+        if (a.content && a.content.video1080hash) {
+            qualities.push({
+                label: '1080p',
+                type: 'video/mp4',
+                hash: a.content.video1080hash,
+            })
+        }
+        if (a.content && a.content.videohash) {
+            qualities.push({
+                label: 'Source',
+                type: 'video/mp4',
+                hash: a.content.videohash,
+            })
+        }
     }
-    if (a.content.video480hash) {
-        qualities.push({
-            label: '480p',
-            type: 'video/mp4',
-            hash: a.content.video480hash,
-        })
-    }
-    if (a.content.video720hash) {
-        qualities.push({
-            label: '720p',
-            type: 'video/mp4',
-            hash: a.content.video720hash,
-        })
-    }
-    if (a.content.video1080hash) {
-        qualities.push({
-            label: '1080p',
-            type: 'video/mp4',
-            hash: a.content.video1080hash,
-        })
-    }
-    qualities.push({
-        label: 'Source',
-        type: 'video/mp4',
-        hash: a.content.videohash,
-    })
     return qualities
 }
 
