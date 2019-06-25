@@ -7,7 +7,7 @@ steemAPI = [
     "https://steemd.minnowsupportproject.org/",
     "https://anyx.io/",
 ]
-avalonAPI = 'https://bran.nannal.com'
+avalonAPI = 'https://avalon.d.tube'
 shortTermGw = "https://video.dtube.top"
 player = null
 itLoaded = false
