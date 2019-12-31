@@ -1,11 +1,18 @@
 gateways = [
+    "https://video.dtube.top",
+    "https://video.oneloveipfs.com",
     "https://ipfs.io",
-    "https://video.dtube.network"
+    "https://ipfs.infura.io",
+    "https://gateway.pinata.cloud",
+    "https://ipfs.eternum.io"
 ]
 steemAPI = [
+    "https://techcoderx.com",
     "https://api.steemit.com/",
     "https://steemd.minnowsupportproject.org/",
     "https://anyx.io/",
+    "https://steemd.privex.io",
+    "https://api.steem.house"
 ]
 avalonAPI = 'https://avalon.d.tube'
 shortTermGw = "https://video.dtube.top"
@@ -197,6 +204,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     if (subtitles)
         menuEntries.push('SubtitlesButton')
     menuEntries.push('ResolutionMenuButton')
+    menuEntries.push('GatewaySwitcherMenuButton')
 
 
     var defaultQuality = qualities[0].label
