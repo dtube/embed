@@ -1,8 +1,7 @@
-/*! videojs-resolution-switcher - 2015-7-26
- * Copyright (c) 2016 Kasper Moskwiak
- * Modified by Pierre Kraft and Derk-Jan Hartman
- * Licensed under the Apache-2.0 license. 
- * https://github.com/kmoskwiak/videojs-resolution-switcher */
+/*
+// Modified by techcoderx from resolutionswitcher.js
+// https://github.com/dtube/embed/blob/master/javascripts/resolutionswitcher.js
+*/
 
 (function() {
     'use strict';
@@ -28,8 +27,6 @@
             }
         })
         GatewayMenuItem.prototype.handleClick = function(event) {
-            // MenuItem.prototype.handleClick.call(this, event);
-
             // Update source in resolution switcher plugin with selected gateway
             let newgw = event.target.innerText.replace(', selected','')
             let sourcesToChange = player.options_.sources
@@ -85,10 +82,6 @@
         IPFSGatewaySwitcher = function(options) {
             let settings = videojs.mergeOptions(defaults, options),
                 player = this
-
-            console.log('Gateway switcher settings', settings)
-            console.log(window)
-            console.log(this)
 
             player.ready(function() {
                 if (settings.ui) {

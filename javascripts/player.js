@@ -1,7 +1,6 @@
 gateways = [
     "https://video.dtube.top",
     "https://video.oneloveipfs.com",
-    "https://ipfsgateway.makingblocks.xyz",
     "https://ipfs.busy.org",
     "https://ipfs.io",
     "https://ipfs.infura.io",
@@ -273,12 +272,11 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
         player.thumbnails(listThumbnails);
     }
 
-
     videojs('player').ready(function() {
-        let loadedVidUrl = player.currentSources[0].src
+        let loadedVidUrl = player.options_.sources[0].src
         let loadedGateway = loadedVidUrl.split('/ipfs/')[0]
         document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = loadedGateway
-        console.log(document.getElementsByClassName('vjs-settings-sub-menu-value'))
+        
         this.hotkeys({
             seekStep: 5,
             enableModifiersForNumbers: false
