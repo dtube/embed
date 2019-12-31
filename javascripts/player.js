@@ -199,6 +199,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
 
     var video = document.body.appendChild(c);
 
+    // Setting menu items
     var menuEntries = []
     menuEntries.push('PlaybackRateMenuButton')
     if (subtitles)
@@ -242,8 +243,10 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             persistvolume: {
                 namespace: 'dtube'
             },
+            IPFSGatewaySwitcher: {},
             videoJsResolutionSwitcher: {
-                default: defaultQuality
+                default: defaultQuality,
+                dynamicLabel: true
             },
             statistics: {
 
