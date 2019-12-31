@@ -1,6 +1,8 @@
 gateways = [
     "https://video.dtube.top",
     "https://video.oneloveipfs.com",
+    "https://ipfsgateway.makingblocks.xyz",
+    "https://ipfs.busy.org",
     "https://ipfs.io",
     "https://ipfs.infura.io",
     "https://gateway.pinata.cloud",
@@ -121,9 +123,9 @@ function handleVideo(video) {
                 if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
 
                 var spriteHash = ''
-                if (video.info && video.info.spriteHash) spriteHash = video.info.spriteHash
-                if (video.content && video.content.spriteHash) spriteHash = video.content.spriteHash
-                if (video.ipfs && video.ipfs.spriteHash) spriteHash = video.ipfs.spriteHash
+                if (video.info && video.info.spritehash) spriteHash = video.info.spritehash
+                if (video.content && video.content.spritehash) spriteHash = video.content.spritehash
+                if (video.ipfs && video.ipfs.spritehash) spriteHash = video.ipfs.spritehash
 
                 var duration = 0
                 if (video.info && video.info.duration) duration = video.info.duration
@@ -273,6 +275,10 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
 
 
     videojs('player').ready(function() {
+        let loadedVidUrl = player.currentSources[0].src
+        let loadedGateway = loadedVidUrl.split('/ipfs/')[0]
+        document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = loadedGateway
+        console.log(document.getElementsByClassName('vjs-settings-sub-menu-value'))
         this.hotkeys({
             seekStep: 5,
             enableModifiersForNumbers: false

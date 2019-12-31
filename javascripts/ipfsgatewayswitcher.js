@@ -28,7 +28,7 @@
             }
         })
         GatewayMenuItem.prototype.handleClick = function(event) {
-            MenuItem.prototype.handleClick.call(this, event);
+            // MenuItem.prototype.handleClick.call(this, event);
 
             // Update source in resolution switcher plugin with selected gateway
             let newgw = event.target.innerText.replace(', selected','')
@@ -41,11 +41,9 @@
             }
 
             console.log('New sources',sourcesToChange)
+            console.log('Gateways changed to ' + event.target.innerText)
+            document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = newgw
             player.updateSrc(sourcesToChange)
-
-            player.on('resolutionchange',() => {
-                console.log('Gateways changed to ' + event.target.innerText)
-            })
         };
         
         MenuItem.registerComponent('GatewayMenuItem', GatewayMenuItem);
