@@ -104,6 +104,7 @@ function handleVideo(video) {
     switch (provider) {
         case "IPFS":
             var qualities = generateQualities(video)
+            if (video.ipfs && video.ipfs.gateway) shortTermGw = 'https://' + video.ipfs.gateway
             findInShortTerm(qualities[0].hash, function(isAvail) {
                 addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
         
