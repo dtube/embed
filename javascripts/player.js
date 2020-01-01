@@ -4,6 +4,7 @@ gateways = [
     "https://ipfs.busy.org",
     "https://ipfs.io",
     "https://ipfs.infura.io",
+    "https://gateway.temporal.cloud",
     "https://gateway.pinata.cloud",
     "https://ipfs.eternum.io"
 ]
