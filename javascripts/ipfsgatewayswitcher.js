@@ -1,7 +1,5 @@
-/*
 // Modified by techcoderx from resolutionswitcher.js
 // https://github.com/dtube/embed/blob/master/javascripts/resolutionswitcher.js
-*/
 
 (function() {
     'use strict';
@@ -38,10 +36,10 @@
             }
 
             console.log('New sources',sourcesToChange)
-            console.log('Gateways changed to ' + event.target.innerText)
+            console.log('Gateways changed to ' + newgw)
             document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = newgw
             player.updateSrc(sourcesToChange)
-        };
+        }
         
         MenuItem.registerComponent('GatewayMenuItem', GatewayMenuItem);
 
@@ -62,7 +60,6 @@
         });
         GatewaySwitcherMenuButton.prototype.createItems = function() {
             let menuItems = [];
-
             for (let i = 0; i < window.gateways.length; i++) {
                 menuItems.push(new GatewayMenuItem(
                     this.player_, {
@@ -71,12 +68,13 @@
                 ))
             }
 
-            return menuItems;
-        };
+            return menuItems
+        }
         
         GatewaySwitcherMenuButton.prototype.buildCSSClass = function() {
             return MenuButton.prototype.buildCSSClass.call(this) + ' vjs-resolution-button';
-        };
+        }
+
         MenuButton.registerComponent('GatewaySwitcherMenuButton', GatewaySwitcherMenuButton);
 
         IPFSGatewaySwitcher = function(options) {
@@ -89,12 +87,11 @@
                     player.controlBar.gatewaySwitcher = player.controlBar.el_.insertBefore(menuButton.el_, player.controlBar.getChild('fullscreenToggle').el_)
                     player.controlBar.gatewaySwitcher.dispose = function() {
                         this.parentNode.removeChild(this)
-                    };
+                    }
                 }
             })
+        }
 
-        };
-
-        videojs.registerPlugin('IPFSGatewaySwitcher', IPFSGatewaySwitcher);
+        videojs.registerPlugin('IPFSGatewaySwitcher', IPFSGatewaySwitcher)
     })(window, videojs);
 })();

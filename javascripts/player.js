@@ -2,6 +2,7 @@ gateways = [
     "https://video.dtube.top",
     "https://video.oneloveipfs.com",
     "https://ipfs.busy.org",
+    "https://ipfsgateway.makingblocks.xyz",
     "https://ipfs.io",
     "https://ipfs.infura.io",
     "https://gateway.temporal.cloud",
