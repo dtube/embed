@@ -10,8 +10,8 @@ gateways = [
     "https://ipfs.eternum.io"
 ]
 steemAPI = [
-    "https://techcoderx.com",
     "https://api.steemit.com/",
+    "https://techcoderx.com",
     "https://steemd.minnowsupportproject.org/",
     "https://anyx.io/",
     "https://steemd.privex.io",
