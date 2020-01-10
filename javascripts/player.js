@@ -1,11 +1,21 @@
 gateways = [
+    "https://video.dtube.top",
+    "https://video.oneloveipfs.com",
+    "https://ipfs.busy.org",
+    "https://ipfsgateway.makingblocks.xyz",
     "https://ipfs.io",
-    "https://video.dtube.network"
+    "https://ipfs.infura.io",
+    "https://gateway.temporal.cloud",
+    "https://gateway.pinata.cloud",
+    "https://ipfs.eternum.io"
 ]
 steemAPI = [
     "https://api.steemit.com/",
+    "https://techcoderx.com",
     "https://steemd.minnowsupportproject.org/",
     "https://anyx.io/",
+    "https://steemd.privex.io",
+    "https://api.steem.house"
 ]
 avalonAPI = 'https://avalon.d.tube'
 shortTermGw = "https://video.dtube.top"
@@ -104,6 +114,7 @@ function handleVideo(video) {
     switch (provider) {
         case "IPFS":
             var qualities = generateQualities(video)
+            if (video.ipfs && video.ipfs.gateway) shortTermGw = 'https://' + video.ipfs.gateway
             findInShortTerm(qualities[0].hash, function(isAvail) {
                 addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
         
@@ -113,9 +124,9 @@ function handleVideo(video) {
                 if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
 
                 var spriteHash = ''
-                if (video.info && video.info.spriteHash) spriteHash = video.info.spriteHash
-                if (video.content && video.content.spriteHash) spriteHash = video.content.spriteHash
-                if (video.ipfs && video.ipfs.spriteHash) spriteHash = video.ipfs.spriteHash
+                if (video.info && video.info.spritehash) spriteHash = video.info.spritehash
+                if (video.content && video.content.spritehash) spriteHash = video.content.spritehash
+                if (video.ipfs && video.ipfs.spritehash) spriteHash = video.ipfs.spritehash
 
                 var duration = 0
                 if (video.info && video.info.duration) duration = video.info.duration
@@ -191,11 +202,13 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
 
     var video = document.body.appendChild(c);
 
+    // Setting menu items
     var menuEntries = []
     menuEntries.push('PlaybackRateMenuButton')
     if (subtitles)
         menuEntries.push('SubtitlesButton')
     menuEntries.push('ResolutionMenuButton')
+    menuEntries.push('GatewaySwitcherMenuButton')
 
 
     var defaultQuality = qualities[0].label
@@ -233,8 +246,10 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             persistvolume: {
                 namespace: 'dtube'
             },
+            IPFSGatewaySwitcher: {},
             videoJsResolutionSwitcher: {
-                default: defaultQuality
+                default: defaultQuality,
+                dynamicLabel: true
             },
             statistics: {
 
@@ -259,8 +274,11 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
         player.thumbnails(listThumbnails);
     }
 
-
     videojs('player').ready(function() {
+        let loadedVidUrl = player.options_.sources[0].src
+        let loadedGateway = loadedVidUrl.split('/ipfs/')[0]
+        document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = loadedGateway
+        
         this.hotkeys({
             seekStep: 5,
             enableModifiersForNumbers: false

@@ -211,12 +211,13 @@
     position: fixed;
     right: 10px;
     bottom: 50px;
-    width: 200px;
+    width: auto;
     margin-right: 0px;
     padding: 5px;
     border-top: 2px red solid!important;
     border-radius: 5px;
     min-height: 84px;
+    min-width: 200px;
 }
 
 .video-js .vjs-menu-button-popup .vjs-menu .vjs-menu-item,
@@ -764,7 +765,7 @@ a:-webkit-any-link {
 .vjs-settings-sub-menu-value,
 .vjs-settings-sub-menu-title {
     display: inline-block;
-    padding: 0 5px;
+    padding: 0 4px;
 }
 
 
@@ -789,7 +790,7 @@ li {
 }
 
 .vjs-settings-sub-menu-title {
-    width: 8em;
+    width: auto;
     text-transform: initial;
 }
 
