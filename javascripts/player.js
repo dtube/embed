@@ -116,7 +116,7 @@ function handleVideo(video) {
             var qualities = generateQualities(video)
             if (video.ipfs && video.ipfs.gateway) shortTermGw = 'https://' + video.ipfs.gateway
             findInShortTerm(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
+                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[4]))
         
                 // start the IPFS player
                 var snapHash = ''
