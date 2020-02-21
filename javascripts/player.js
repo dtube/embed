@@ -1,13 +1,15 @@
 gateways = [
-    "https://video.dtube.top",
-    "https://video.oneloveipfs.com",
-    "https://ipfs.busy.org",
-    "https://ipfsgateway.makingblocks.xyz",
-    "https://ipfs.io",
-    "https://ipfs.infura.io",
-    "https://gateway.temporal.cloud",
-    "https://gateway.pinata.cloud",
-    "https://ipfs.eternum.io"
+    "https://player.d.tube/btfs/",
+    "https://btfs.d.tube/btfs/",
+    "https://video.dtube.top/ipfs/",
+    "https://video.oneloveipfs.com/ipfs/",
+    "https://ipfs.busy.org/ipfs/",
+    "https://ipfsgateway.makingblocks.xyz/ipfs/",
+    "https://ipfs.io/ipfs/",
+    "https://ipfs.infura.io/ipfs/",
+    "https://gateway.temporal.cloud/ipfs/",
+    "https://gateway.pinata.cloud/ipfs/",
+    "https://ipfs.eternum.io/ipfs/"
 ]
 steemAPI = [
     "https://api.steemit.com/",
@@ -18,7 +20,8 @@ steemAPI = [
     "https://api.steem.house"
 ]
 avalonAPI = 'https://avalon.d.tube'
-shortTermGw = "https://video.dtube.top"
+IpfsShortTermGw = 'https://video.dtube.top'
+BtfsShortTermGw = "https://player.d.tube"
 player = null
 itLoaded = false
 timeout = 1500
@@ -43,8 +46,8 @@ if (videoAuthor != 'raza3223')
     
 
 
-function findInShortTerm(hash, cb) {
-    const url = shortTermGw + '/ipfs/' + hash
+function findInShortTermIpfs(hash, cb) {
+    const url = IpfsShortTermGw + '/ipfs/' + hash
     const request = new XMLHttpRequest();
     request.open("HEAD", url, true);
     request.onerror = function(e) {
@@ -54,7 +57,26 @@ function findInShortTerm(hash, cb) {
         if (request.readyState === request.HEADERS_RECEIVED) {
             if (request.status === 200) {
                 const headers = request.getAllResponseHeaders()
-                console.log(headers, shortTermGw)
+                console.log(headers, IpfsShortTermGw)
+                cb(true)
+            } else cb()
+        }
+    }
+    request.send();
+}
+
+function findInShortTermBtfs(hash, cb) {
+    const url = BtfsShortTermGw + '/btfs/' + hash
+    const request = new XMLHttpRequest();
+    request.open("HEAD", url, true);
+    request.onerror = function(e) {
+        console.log('Error: ' + url)
+    }
+    request.onreadystatechange = function() {
+        if (request.readyState === request.HEADERS_RECEIVED) {
+            if (request.status === 200) {
+                const headers = request.getAllResponseHeaders()
+                console.log(headers, BtfsShortTermGw)
                 cb(true)
             } else cb()
         }
@@ -114,11 +136,38 @@ function handleVideo(video) {
     switch (provider) {
         case "IPFS":
             var qualities = generateQualities(video)
-            if (video.ipfs && video.ipfs.gateway) shortTermGw = 'https://' + video.ipfs.gateway
-            findInShortTerm(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? shortTermGw : gateways[0]))
+            if (video.ipfs && video.ipfs.gateway) IpfsShortTermGw = 'https://' + video.ipfs.gateway
+            findInShortTermIpfs(qualities[0].hash, function(isAvail) {
+                console.log(IpfsShortTermGw)
+                addQualitiesSource(qualities, (isAvail ? IpfsShortTermGw : gateways[0]))
         
-                // start the IPFS player
+                var snapHash = ''
+                if (video.info && video.info.snaphash) snapHash = video.info.snaphash
+                if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
+
+                var spriteHash = ''
+                if (video.info && video.info.spritehash) spriteHash = video.info.spritehash
+                if (video.content && video.content.spritehash) spriteHash = video.content.spritehash
+                if (video.ipfs && video.ipfs.spritehash) spriteHash = video.ipfs.spritehash
+
+                var duration = 0
+                if (video.info && video.info.duration) duration = video.info.duration
+                if (video.duration) duration = video.duration
+
+                var subtitles = null
+                if (video.content && video.content.subtitles) subtitles = video.content.subtitles
+                if (video.ipfs && video.ipfs.subtitles) subtitles = video.ipfs.subtitles
+
+                createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
+            })
+            break;
+
+        case "BTFS":
+            var qualities = generateQualities(video)
+            if (video.ipfs && video.ipfs.gateway) BtfsShortTermGw = 'https://' + video.ipfs.gateway
+            findInShortTermBtfs(qualities[0].hash, function(isAvail) {
+                addQualitiesSource(qualities, (isAvail ? BtfsShortTermGw : gateways[0]))
+        
                 var snapHash = ''
                 if (video.info && video.info.snaphash) snapHash = video.info.snaphash
                 if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
@@ -265,7 +314,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             var nSeconds = s
             if (duration > 100) nSeconds = Math.floor(s * duration / 100)
             listThumbnails[nSeconds] = {
-                src: canonicalUrl(sprite),
+                src: spriteUrl(sprite),
                 style: {
                     margin: -118 * s + 'px 0px 0px 0px',
                 }
@@ -276,7 +325,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
 
     videojs('player').ready(function() {
         let loadedVidUrl = player.options_.sources[0].src
-        let loadedGateway = loadedVidUrl.split('/ipfs/')[0]
+        let loadedGateway = loadedVidUrl.split('/btfs/')[0]
         document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = loadedGateway
         
         this.hotkeys({
@@ -430,7 +479,11 @@ function canonicalGateway(ipfsHash) {
 }
 
 function canonicalUrl(ipfsHash) {
-    return 'https://' + canonicalGateway(ipfsHash) + '/ipfs/' + ipfsHash
+    return 'https://' + canonicalGateway(ipfsHash) +  ipfsHash
+}
+
+function spriteUrl(ipfsHash) {
+    return 'https://sprite.d.tube/btfs/' + ipfsHash
 }
 
 // function findBestUrl(hash, cb) {
@@ -538,8 +591,11 @@ function generateQualities(a) {
 }
 
 function addQualitiesSource(qualities, gateway) {
+    var prefix = '/ipfs/'
+    if (gateway == BtfsShortTermGw || gateway.indexOf('btfs') > -1)
+        prefix = '/btfs/'
     for (let i = 0; i < qualities.length; i++) {
-        qualities[i].src = gateway + '/ipfs/' + qualities[i].hash
+        qualities[i].src = gateway + prefix + qualities[i].hash
     }
 }
 
