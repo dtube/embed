@@ -188,7 +188,7 @@
         progressControl.on('touchmove', moveListener);
 
         moveCancel = function(event) {
-            div.style = 'position: absolute;bottom: 30px;max-height: 118px;width: 210px; margin-left:-105px;overflow: hidden;';
+            div.style = 'position: absolute;bottom: 60px;max-height: 72px;width: 128px; margin-left:-64px;overflow: hidden;';
         };
 
         // move the placeholder out of the way when not hovering

@@ -316,7 +316,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             listThumbnails[nSeconds] = {
                 src: spriteUrl(sprite),
                 style: {
-                    margin: -118 * s + 'px 0px 0px 0px',
+                    margin: -72 * s + 'px 0px 0px 0px',
                 }
             }
         }
