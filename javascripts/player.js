@@ -139,7 +139,7 @@ function handleVideo(video) {
             if (video.ipfs && video.ipfs.gateway) IpfsShortTermGw = 'https://' + video.ipfs.gateway
             findInShortTermIpfs(qualities[0].hash, function(isAvail) {
                 console.log(IpfsShortTermGw)
-                addQualitiesSource(qualities, (isAvail ? IpfsShortTermGw : gateways[0]))
+                addQualitiesSource(qualities, (isAvail ? IpfsShortTermGw : gateways[6]))
         
                 var snapHash = ''
                 if (video.info && video.info.snaphash) snapHash = video.info.snaphash
@@ -166,7 +166,7 @@ function handleVideo(video) {
             var qualities = generateQualities(video)
             if (video.ipfs && video.ipfs.gateway) BtfsShortTermGw = 'https://' + video.ipfs.gateway
             findInShortTermBtfs(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? BtfsShortTermGw : gateways[0]))
+                addQualitiesSource(qualities, (isAvail ? BtfsShortTermGw : gateways[1]))
         
                 var snapHash = ''
                 if (video.info && video.info.snaphash) snapHash = video.info.snaphash
@@ -326,6 +326,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     videojs('player').ready(function() {
         let loadedVidUrl = player.options_.sources[0].src
         let loadedGateway = loadedVidUrl.split('/btfs/')[0]
+        if (loadedVidUrl.includes('/ipfs/')) loadedGateway = loadedVidUrl.split('/ipfs/')[0]
         document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = loadedGateway
         
         this.hotkeys({
