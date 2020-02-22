@@ -32,7 +32,7 @@
             console.log(newgw)
 
             for (let i = 0; i < sourcesToChange.length; i++) {
-                sourcesToChange[i].src = newgw + '/ipfs/' + sourcesToChange[i].hash
+                sourcesToChange[i].src = newgw + sourcesToChange[i].hash
             }
 
             console.log('New sources',sourcesToChange)
