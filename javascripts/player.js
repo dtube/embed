@@ -139,7 +139,7 @@ function handleVideo(video) {
             if (video.ipfs && video.ipfs.gateway) IpfsShortTermGw = 'https://' + video.ipfs.gateway
             findInShortTermIpfs(qualities[0].hash, function(isAvail) {
                 console.log(IpfsShortTermGw)
-                addQualitiesSource(qualities, (isAvail ? IpfsShortTermGw : gateways[6]))
+                addQualitiesSource(qualities, (isAvail ? IpfsShortTermGw : gateways[6].slice(0,-6)))
         
                 var snapHash = ''
                 if (video.info && video.info.snaphash) snapHash = video.info.snaphash
@@ -166,7 +166,7 @@ function handleVideo(video) {
             var qualities = generateQualities(video)
             if (video.ipfs && video.ipfs.gateway) BtfsShortTermGw = 'https://' + video.ipfs.gateway
             findInShortTermBtfs(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? BtfsShortTermGw : gateways[1]))
+                addQualitiesSource(qualities, (isAvail ? BtfsShortTermGw : gateways[1].slice(0,-6)))
         
                 var snapHash = ''
                 if (video.info && video.info.snaphash) snapHash = video.info.snaphash
