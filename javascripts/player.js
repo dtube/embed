@@ -54,7 +54,7 @@ function findInShortTermIpfs(hash, cb) {
         console.log('Error: ' + url)
     }
     request.onreadystatechange = function() {
-        if (request.readyState === request.HEADERS_RECEIVED) {
+        if (request.readyState === request.DONE) {
             if (request.status === 200) {
                 const headers = request.getAllResponseHeaders()
                 console.log(headers, IpfsShortTermGw)
@@ -73,7 +73,7 @@ function findInShortTermBtfs(hash, cb) {
         console.log('Error: ' + url)
     }
     request.onreadystatechange = function() {
-        if (request.readyState === request.HEADERS_RECEIVED) {
+        if (request.readyState === request.DONE) {
             if (request.status === 200) {
                 const headers = request.getAllResponseHeaders()
                 console.log(headers, BtfsShortTermGw)
