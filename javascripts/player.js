@@ -33,7 +33,17 @@ var nobranding = (path.split("/")[3] == 'true')
 var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
-if (videoAuthor != 'raza3223')
+// if you don't pass anything in the first field (emb.d.tube/#!//)
+// you can pass a a urlencoded, stringified json in the second field
+// to skip blockchain load time a second time
+if (videoAuthor === '')
+    try {
+        var json = JSON.parse(decodeURI(videoPermlink))
+        handleVideo(json)
+    } catch (error) {
+        console.log('Bad video JSON', error)
+    }
+else
     findAvalon(videoAuthor, videoPermlink, function(err, res) {
         if (err || !res) {
             console.log(err, res)
@@ -43,8 +53,6 @@ if (videoAuthor != 'raza3223')
             handleVideo(res.json)
         }
     })
-    
-
 
 function findInShortTermIpfs(hash, cb) {
     const url = IpfsShortTermGw + '/ipfs/' + hash
