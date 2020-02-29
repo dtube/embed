@@ -38,7 +38,8 @@ var snapGateway = path.split("/")[5]
 // to skip blockchain load time a second time
 if (videoAuthor === '')
     try {
-        var json = JSON.parse(decodeURI(videoPermlink))
+        var json = JSON.parse(atob(videoPermlink))
+        console.log('Video loaded from URL', json)
         handleVideo(json)
     } catch (error) {
         console.log('Bad video JSON', error)
@@ -243,6 +244,25 @@ function handleVideo(video) {
     }
 }
 
+function enableSprite(duration, sprite) {
+    if (!duration) return
+    if (!sprite) return
+    var listThumbnails = {}
+    var nFrames = 100
+    if (duration < 100) nFrames = Math.floor(duration)
+    for (let s = 0; s < nFrames; s++) {
+        var nSeconds = s
+        if (duration > 100) nSeconds = Math.floor(s * duration / 100)
+        listThumbnails[nSeconds] = {
+            src: spriteUrl(sprite),
+            style: {
+                margin: -72 * s + 'px 0px 0px 0px',
+            }
+        }
+    }
+    player.thumbnails(listThumbnails);
+}
+
 function createPlayer(posterHash, autoplay, branding, qualities, sprite, duration, subtitles) {
     var c = document.createElement("video");
     c.poster = 'https://snap1.d.tube/ipfs/'+posterHash;
@@ -254,6 +274,10 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     c.addEventListener('loadeddata', function() {
         if (c.readyState >= 3) {
             itLoaded = true
+            if (!duration) {
+                duration = Math.round(player.duration())
+                enableSprite(duration, sprite)
+            }
         }
     });
 
@@ -313,25 +337,10 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             }
         }
     })
-
-    if (sprite) {
-        var listThumbnails = {}
-        var nFrames = 100
-        if (duration < 100) nFrames = Math.floor(duration)
-        for (let s = 0; s < nFrames; s++) {
-            var nSeconds = s
-            if (duration > 100) nSeconds = Math.floor(s * duration / 100)
-            listThumbnails[nSeconds] = {
-                src: spriteUrl(sprite),
-                style: {
-                    margin: -72 * s + 'px 0px 0px 0px',
-                }
-            }
-        }
-        player.thumbnails(listThumbnails);
-    }
-
+    enableSprite(duration, sprite)
     videojs('player').ready(function() {
+        const adapter = new playerjs.VideoJSAdapter(this)
+        
         let loadedVidUrl = player.options_.sources[0].src
         let loadedGateway = loadedVidUrl.split('/btfs/')[0]
         if (loadedVidUrl.includes('/ipfs/')) loadedGateway = loadedVidUrl.split('/ipfs/')[0]
@@ -358,6 +367,8 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     
             }
         }
+
+        adapter.ready()
     });
 
     player.brand({

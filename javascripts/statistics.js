@@ -1,3 +1,6 @@
+// player.trigger('startStats') to open
+// player.trigger('stopStats') to close
+
 function getCurrentStats() {
     return {
         droppedVideoFrames: player.getVideoPlaybackQuality().droppedVideoFrames,
@@ -18,6 +21,11 @@ function statisticsPlugin(options) {
     var interval = null
     this.on('stopStats', function() {
         clearInterval(interval)
+        var element = document.getElementById("infoPanel");
+        if (element)
+            element.parentNode.removeChild(element);
+        isStarted = false
+        
     })
     this.on('startStats', function() {
         if (!isStarted) {
