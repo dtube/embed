@@ -34,11 +34,11 @@ var videoGateway = path.split("/")[4]
 var snapGateway = path.split("/")[5]
 
 // if you don't pass anything in the first field (emb.d.tube/#!//)
-// you can pass a a urlencoded, stringified json in the second field
-// to skip blockchain load time a second time
+// you can pass JSOUN data in the second field
+// and skip blockchain loading time
 if (videoAuthor === '')
     try {
-        var json = JSON.parse(atob(videoPermlink))
+        var json = JSOUN.decode(videoPermlink)
         console.log('Video loaded from URL', json)
         handleVideo(json)
     } catch (error) {
@@ -55,8 +55,9 @@ else
         }
     })
 
-function findInShortTermIpfs(hash, cb) {
-    const url = IpfsShortTermGw + '/ipfs/' + hash
+function findInShortTerm(prov, hash, cb) {
+    var gw = getDefaultGateway(prov)
+    const url = gw + '/ipfs/' + hash
     const request = new XMLHttpRequest();
     request.open("HEAD", url, true);
     request.onerror = function(e) {
@@ -66,26 +67,7 @@ function findInShortTermIpfs(hash, cb) {
         if (request.readyState === request.DONE) {
             if (request.status === 200) {
                 const headers = request.getAllResponseHeaders()
-                console.log(headers, IpfsShortTermGw)
-                cb(true)
-            } else cb()
-        }
-    }
-    request.send();
-}
-
-function findInShortTermBtfs(hash, cb) {
-    const url = BtfsShortTermGw + '/btfs/' + hash
-    const request = new XMLHttpRequest();
-    request.open("HEAD", url, true);
-    request.onerror = function(e) {
-        console.log('Error: ' + url)
-    }
-    request.onreadystatechange = function() {
-        if (request.readyState === request.DONE) {
-            if (request.status === 200) {
-                const headers = request.getAllResponseHeaders()
-                console.log(headers, BtfsShortTermGw)
+                console.log(headers, gw)
                 cb(true)
             } else cb()
         }
@@ -139,65 +121,27 @@ function findVideo(retries = 3) {
 }
 
 function handleVideo(video) {
-    var provider = 'IPFS'
-    if (video && video.providerName) provider = video.providerName
-
+    var provider = getDefaultProvider(video)
+    
     switch (provider) {
+        // Our custom DTube Player
         case "IPFS":
-            var qualities = generateQualities(video)
-            if (video.ipfs && video.ipfs.gateway) IpfsShortTermGw = 'https://' + video.ipfs.gateway
-            findInShortTermIpfs(qualities[0].hash, function(isAvail) {
-                console.log(IpfsShortTermGw)
-                addQualitiesSource(qualities, (isAvail ? IpfsShortTermGw : gateways[6].slice(0,-6)))
-        
-                var snapHash = ''
-                if (video.info && video.info.snaphash) snapHash = video.info.snaphash
-                if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
-
-                var spriteHash = ''
-                if (video.info && video.info.spritehash) spriteHash = video.info.spritehash
-                if (video.content && video.content.spritehash) spriteHash = video.content.spritehash
-                if (video.ipfs && video.ipfs.spritehash) spriteHash = video.ipfs.spritehash
-
-                var duration = 0
-                if (video.info && video.info.duration) duration = video.info.duration
-                if (video.duration) duration = video.duration
-
-                var subtitles = null
-                if (video.content && video.content.subtitles) subtitles = video.content.subtitles
-                if (video.ipfs && video.ipfs.subtitles) subtitles = video.ipfs.subtitles
-
-                createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
-            })
-            break;
-
         case "BTFS":
+            var gw = getDefaultGateway(provider, video)
             var qualities = generateQualities(video)
-            if (video.ipfs && video.ipfs.gateway) BtfsShortTermGw = 'https://' + video.ipfs.gateway
-            findInShortTermBtfs(qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? BtfsShortTermGw : gateways[1].slice(0,-6)))
+            findInShortTerm(provider, qualities[0].hash, function(isAvail) {
+                addQualitiesSource(qualities, (isAvail ? gw : getFallbackGateway(provider)))
         
-                var snapHash = ''
-                if (video.info && video.info.snaphash) snapHash = video.info.snaphash
-                if (video.ipfs && video.ipfs.snaphash) snapHash = video.ipfs.snaphash
-
-                var spriteHash = ''
-                if (video.info && video.info.spritehash) spriteHash = video.info.spritehash
-                if (video.content && video.content.spritehash) spriteHash = video.content.spritehash
-                if (video.ipfs && video.ipfs.spritehash) spriteHash = video.ipfs.spritehash
-
-                var duration = 0
-                if (video.info && video.info.duration) duration = video.info.duration
-                if (video.duration) duration = video.duration
-
-                var subtitles = null
-                if (video.content && video.content.subtitles) subtitles = video.content.subtitles
-                if (video.ipfs && video.ipfs.subtitles) subtitles = video.ipfs.subtitles
+                var snapHash = getSnapHash(video)
+                var spriteHash = getSpriteHash(video)
+                var duration = getDuration(video)
+                var subtitles = getSubtitles(video)
 
                 createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
             })
             break;
 
+        // Redirects to 3rd party embeds
         case "Twitch":
             if (video.twitch_type && video.twitch_type == 'clip')
               window.location.href = "https://clips.twitch.tv/embed?clip=" + video.videoId
@@ -244,6 +188,92 @@ function handleVideo(video) {
     }
 }
 
+function getDefaultProvider(video) {
+    if (video && video.providerName) return video.providerName
+    if (video && video.files) {
+        if (video.files.btfs)
+            return 'BTFS'
+        if (video.files.ipfs)
+            return 'IPFS'
+        if (video.files.youtube)
+            return 'YouTube'
+        if (video.files.facebook)
+            return 'Facebook'
+        if (video.files.vimeo)
+            return 'Vimeo'
+        if (video.files.liveleak)
+            return 'LiveLeak'
+        if (video.files.instagram)
+            return 'Instagram'
+        if (video.files.dailymotion)
+            return 'Dailymotion'
+        if (video.files.twitch)
+            return 'Twitch'
+    }
+    return 'IPFS'
+}
+
+function getDefaultGateway(prov, video) {
+    if (prov == 'IPFS' && video && video.files && video.files.ipfs && video.files.ipfs.gw)
+        return video.files.ipfs.gw
+    if (prov == 'BTFS' && video && video.files && video.files.btfs && video.files.btfs.gw)
+        return video.files.btfs.gw
+    if (prov == 'IPFS') return IpfsShortTermGw
+    if (prov == 'BTFS') return BtfsShortTermGw
+}
+
+function getFallbackGateway(prov) {
+    if (prov == 'IPFS') return gateways[6].slice(0,-6)
+    if (prov == 'BTFS') return gateways[1].slice(0,-6)
+}
+
+function getSnapHash(video) {
+    if (video.files && video.files.btfs && video.files.btfs.img && video.files.btfs.img["360"])
+        return video.files.btfs.img["360"]
+    if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img["360"])
+        return video.files.ipfs.img["360"]
+    if (video.files && video.files.btfs && video.files.btfs.img && video.files.btfs.img["118"])
+        return video.files.btfs.img["118"]
+    if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img["118"])
+        return video.files.ipfs.img["118"]
+    if (video.ipfs && video.ipfs.snaphash) return video.ipfs.snaphash
+    if (video.info && video.info.snaphash) return video.info.snaphash
+    return ''
+}
+
+function getSpriteHash(video) {
+    if (video.files && video.files.btfs && video.files.btfs.img && video.files.btfs.img.spr)
+        return video.files.btfs.img.spr
+    if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img.spr)
+        return video.files.ipfs.img.spr
+    if (video.ipfs && video.ipfs.spritehash) return video.ipfs.spritehash
+    if (video.content && video.content.spritehash) return video.content.spritehash
+    if (video.info && video.info.spritehash) return video.info.spritehash
+    return ''
+}
+
+function getDuration(video) {
+    if (video.dur) return video.dur
+    if (video.duration) return video.duration
+    if (video.info && video.info.duration) return video.info.duration
+}
+
+function getSubtitles(video) {
+    if (video.ipfs && video.ipfs.subtitles) return video.ipfs.subtitles
+    if (video.content && video.content.subtitles) return video.content.subtitles
+    if (video.files && video.files.ipfs && video.files.ipfs.sub) {
+        var subs = []
+        for (const lang in video.files.ipfs.sub) {
+            subs.push({
+                lang: lang,
+                hash: video.files.ipfs.sub[lang]
+            })
+        }
+        return subs
+    }
+    return null
+}
+
 function enableSprite(duration, sprite) {
     if (!duration) return
     if (!sprite) return
@@ -276,6 +306,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             itLoaded = true
             if (!duration) {
                 duration = Math.round(player.duration())
+                parent.postMessage({dur: duration}, "*")
                 enableSprite(duration, sprite)
             }
         }
@@ -506,34 +537,34 @@ function spriteUrl(ipfsHash) {
     return 'https://sprite.d.tube/btfs/' + ipfsHash
 }
 
-// function findBestUrl(hash, cb) {
-//     let isFirst = true;
-//     gateways.forEach((gateway) => {
-//         const url = gateway + '/ipfs/' + hash
-//         const request = new XMLHttpRequest();
-//         request.open("HEAD", url, true);
-//         request.onerror = function(e) {
-//             console.log('Error: ' + url)
-//         }
-//         request.onreadystatechange = function() {
-//             if (request.readyState === request.HEADERS_RECEIVED) {
-//                 if (request.status === 200) {
-//                     const headers = request.getAllResponseHeaders()
-//                     console.log(headers, gateway)
-//                     if (isFirst) {
-//                         isFirst = false
-//                         cb(gateway)
-//                     }
-//                 }
-//             }
-//         }
-//         request.send();
-//     })
-// }
-
 function generateQualities(a) {
     var qualities = []
-    // sorted from lowest to highest quality
+    // new format
+    if (a.files) {
+        for (const prov in a.files) {
+            if (!a.files[prov].vid) continue;
+            for (const key in a.files.btfs.vid) {
+                if (key == 'src') {
+                    qualities.push({
+                        label: 'Source '+prov,
+                        type: 'video/mp4',
+                        hash: a.files.btfs.vid.src,
+                        network: prov.toUpperCase()
+                    })
+                    continue
+                }
+                qualities.push({
+                    label: key+'p '+prov,
+                    type: 'video/mp4',
+                    hash: a.files.btfs.vid[key],
+                    network: prov.toUpperCase()
+                })
+            }
+        }
+        return qualities
+    }
+
+    // old video format
     if (a.ipfs) {
         if (a.ipfs.video240hash) {
             qualities.push({
