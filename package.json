@@ -1,0 +1,29 @@
+{
+  "name": "dtube-embed",
+  "version": "0.9.1",
+  "description": "embed player for d.tube",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dtube/embed.git"
+  },
+  "keywords": [
+    "dtube",
+    "video",
+    "embed",
+    "player"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dtube/embed/issues"
+  },
+  "homepage": "https://github.com/dtube/embed#readme",
+  "devDependencies": {
+    "clean-css": "^4.2.3",
+    "terser": "^4.6.6"
+  }
+}

@@ -1,9 +1,3 @@
-/*! videojs-resolution-switcher - 2015-7-26
- * Copyright (c) 2016 Kasper Moskwiak
- * Modified by Pierre Kraft and Derk-Jan Hartman
- * Licensed under the Apache-2.0 license. 
- * https://github.com/kmoskwiak/videojs-resolution-switcher */
-
 (function() {
     'use strict';
     var videojs = null;
