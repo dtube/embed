@@ -57,7 +57,9 @@ else
 
 function findInShortTerm(prov, hash, cb) {
     var gw = getDefaultGateway(prov)
-    const url = gw + '/ipfs/' + hash
+    var prefix = '/ipfs/'
+    if (prov == 'BTFS') prefix = '/btfs/'
+    const url = gw + prefix + hash
     const request = new XMLHttpRequest();
     request.open("HEAD", url, true);
     request.onerror = function(e) {
