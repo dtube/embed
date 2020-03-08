@@ -356,7 +356,8 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     menuEntries.push('PlaybackRateMenuButton')
     if (subtitles)
         menuEntries.push('SubtitlesButton')
-    menuEntries.push('ResolutionMenuButton')
+    if (qualities.length > 1)
+        menuEntries.push('ResolutionMenuButton')
     menuEntries.push('GatewaySwitcherMenuButton')
 
 
