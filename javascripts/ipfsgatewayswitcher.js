@@ -60,10 +60,10 @@
         });
         GatewaySwitcherMenuButton.prototype.createItems = function() {
             let menuItems = [];
-            for (let i = 0; i < window.gateways.length; i++) {
+            for (let i = 0; i < window.portals[provider].length; i++) {
                 menuItems.push(new GatewayMenuItem(
                     this.player_, {
-                        label: window.gateways[i]
+                        label: window.portals[provider][i]
                     }
                 ))
             }

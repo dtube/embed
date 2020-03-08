@@ -1,16 +1,29 @@
-gateways = [
-    "https://player.d.tube/btfs/",
-    "https://btfs.d.tube/btfs/",
-    "https://video.dtube.top/ipfs/",
-    "https://video.oneloveipfs.com/ipfs/",
-    "https://ipfs.busy.org/ipfs/",
-    "https://ipfsgateway.makingblocks.xyz/ipfs/",
-    "https://ipfs.io/ipfs/",
-    "https://ipfs.infura.io/ipfs/",
-    "https://gateway.temporal.cloud/ipfs/",
-    "https://gateway.pinata.cloud/ipfs/",
-    "https://ipfs.eternum.io/ipfs/"
-]
+portals = {
+    IPFS: [
+        "https://video.dtube.top/ipfs/",
+        "https://video.oneloveipfs.com/ipfs/",
+        "https://ipfs.busy.org/ipfs/",
+        "https://ipfsgateway.makingblocks.xyz/ipfs/",
+        "https://ipfs.io/ipfs/",
+        "https://ipfs.infura.io/ipfs/",
+        "https://gateway.temporal.cloud/ipfs/",
+        "https://gateway.pinata.cloud/ipfs/",
+        "https://ipfs.eternum.io/ipfs/"
+    ],
+    BTFS: [
+        "https://player.d.tube/btfs/",
+        "https://btfs.d.tube/btfs/"
+    ],
+    Skynet: [
+        "https://siasky.net/",
+        "https://skydrain.net/",
+        "https://sialoop.net/",
+        "https://skynet.luxor.tech/",
+        "https://skynet.tutemwesi.com/",
+        "https://siacdn.com/",
+        "https://vault.lightspeedhosting.com/"
+    ]
+}
 steemAPI = [
     "https://api.steemit.com/",
     "https://techcoderx.com",
@@ -30,30 +43,37 @@ var videoAuthor = path.split("/")[0]
 var videoPermlink = path.split("/")[1]
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
-var videoGateway = path.split("/")[4]
-var snapGateway = path.split("/")[5]
+provider = path.split("/")[4]
 
-// if you don't pass anything in the first field (emb.d.tube/#!//)
-// you can pass JSOUN data in the second field
-// and skip blockchain loading time
-if (videoAuthor === '')
-    try {
-        var json = JSOUN.decode(videoPermlink)
-        console.log('Video loaded from URL', json)
-        handleVideo(json)
-    } catch (error) {
-        console.log('Bad video JSON', error)
-    }
-else
-    findAvalon(videoAuthor, videoPermlink, function(err, res) {
-        if (err || !res) {
-            console.log(err, res)
-            findVideo()
-        } else {
-            console.log('Video loaded from '+avalonAPI, res)
-            handleVideo(res.json)
+document.addEventListener("DOMContentLoaded", function(event) {
+    startup()
+});
+
+function startup() {
+    // if you don't pass anything in the first field (emb.d.tube/#!//)
+    // you can pass JSOUN data in the second field
+    // and skip blockchain loading time
+    if (videoAuthor === '') {
+        try {
+            var json = JSOUN.decode(videoPermlink)
+            console.log('Video loaded from URL', json)
+        } catch (error) {
+            console.log('Bad video JSON', error)
+            return
         }
-    })
+        handleVideo(json)
+    }
+    else
+        findAvalon(videoAuthor, videoPermlink, function(err, res) {
+            if (err || !res) {
+                console.log(err, res)
+                findVideo()
+            } else {
+                console.log('Video loaded from '+avalonAPI, res)
+                handleVideo(res.json)
+            }
+        })
+}
 
 function findInShortTerm(prov, hash, cb) {
     var gw = getDefaultGateway(prov)
@@ -123,7 +143,7 @@ function findVideo(retries = 3) {
 }
 
 function handleVideo(video) {
-    var provider = getDefaultProvider(video)
+    if (!provider) provider = getDefaultProvider(video)
     
     switch (provider) {
         // Our custom DTube Player
@@ -138,9 +158,21 @@ function handleVideo(video) {
                 var spriteHash = getSpriteHash(video)
                 var duration = getDuration(video)
                 var subtitles = getSubtitles(video)
-
                 createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
             })
+            break;
+
+        case "Skynet":
+            var gw = getDefaultGateway(provider, video)
+            var qualities = generateQualities(video)
+            addQualitiesSource(qualities, gw, 'Skynet')
+            
+            var snapHash = getSnapHash(video)
+            var spriteHash = getSpriteHash(video)
+            var duration = getDuration(video)
+            var subtitles = getSubtitles(video)
+            
+            createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
             break;
 
         // Redirects to 3rd party embeds
@@ -197,6 +229,8 @@ function getDefaultProvider(video) {
             return 'BTFS'
         if (video.files.ipfs)
             return 'IPFS'
+        if (video.files.sia)
+            return 'Skynet'
         if (video.files.youtube)
             return 'YouTube'
         if (video.files.facebook)
@@ -220,13 +254,16 @@ function getDefaultGateway(prov, video) {
         return video.files.ipfs.gw
     if (prov == 'BTFS' && video && video.files && video.files.btfs && video.files.btfs.gw)
         return video.files.btfs.gw
-    if (prov == 'IPFS') return IpfsShortTermGw
-    if (prov == 'BTFS') return BtfsShortTermGw
+    if (prov == 'IPFS') return portals.IPFS[0]
+    if (prov == 'BTFS') return portals.BTFS[0]
+    if (prov == 'Skynet') return portals.Skynet[0]
+    return
 }
 
 function getFallbackGateway(prov) {
-    if (prov == 'IPFS') return gateways[6].slice(0,-6)
-    if (prov == 'BTFS') return gateways[1].slice(0,-6)
+    if (prov == 'IPFS') return portals.IPFS[1].slice(0,-6)
+    if (prov == 'BTFS') return portals.BTFS[1].slice(0,-6)
+    if (prov == 'Skynet') return portals.Skynet[1]
 }
 
 function getSnapHash(video) {
@@ -375,8 +412,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
         const adapter = new playerjs.VideoJSAdapter(this)
         
         let loadedVidUrl = player.options_.sources[0].src
-        let loadedGateway = loadedVidUrl.split('/btfs/')[0]
-        if (loadedVidUrl.includes('/ipfs/')) loadedGateway = loadedVidUrl.split('/ipfs/')[0]
+        let loadedGateway = loadedVidUrl.split('/')[2]
         document.getElementsByClassName('vjs-settings-sub-menu-value')[document.getElementsByClassName('vjs-settings-sub-menu-value').length - 1].innerHTML = loadedGateway
         
         this.hotkeys({
@@ -393,7 +429,7 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
             for (let i = 0; i < subtitles.length; i++) {
                 player.addRemoteTextTrack({
                     kind: "subtitles",
-                    src: canonicalUrl(subtitles[i].hash),
+                    src: subtitleUrl(subtitles[i].hash),
                     srclang: subtitles[i].lang,
                     label: subtitles[i].lang
                 })
@@ -526,13 +562,8 @@ function removePlayer() {
     return elem.parentNode.removeChild(elem);
 }
 
-function canonicalGateway(ipfsHash) {
-    var g = ipfsHash.charCodeAt(ipfsHash.length - 1) % gateways.length
-    return gateways[g].split('://')[1]
-}
-
-function canonicalUrl(ipfsHash) {
-    return 'https://' + canonicalGateway(ipfsHash) +  ipfsHash
+function subtitleUrl(ipfsHash) {
+    return 'https://snap1.d.tube/ipfs/' + ipfsHash
 }
 
 function spriteUrl(ipfsHash) {
@@ -545,20 +576,20 @@ function generateQualities(a) {
     if (a.files) {
         for (const prov in a.files) {
             if (!a.files[prov].vid) continue;
-            for (const key in a.files.btfs.vid) {
+            for (const key in a.files[prov].vid) {
                 if (key == 'src') {
                     qualities.push({
-                        label: 'Source '+prov,
+                        label: 'Source',
                         type: 'video/mp4',
-                        hash: a.files.btfs.vid.src,
+                        hash: a.files[prov].vid.src,
                         network: prov.toUpperCase()
                     })
                     continue
                 }
                 qualities.push({
-                    label: key+'p '+prov,
+                    label: key+'p',
                     type: 'video/mp4',
-                    hash: a.files.btfs.vid[key],
+                    hash: a.files[prov].vid[key],
                     network: prov.toUpperCase()
                 })
             }
@@ -643,9 +674,15 @@ function generateQualities(a) {
     return qualities
 }
 
-function addQualitiesSource(qualities, gateway) {
+function addQualitiesSource(qualities, gateway, prov) {
+    if (prov == 'Skynet') {
+        for (let i = 0; i < qualities.length; i++) {
+            qualities[i].src = gateway + qualities[i].hash
+        }
+        return
+    }
     var prefix = '/ipfs/'
-    if (gateway == BtfsShortTermGw || gateway.indexOf('btfs') > -1)
+    if (gateway.indexOf('/btfs') > -1)
         prefix = '/btfs/'
     for (let i = 0; i < qualities.length; i++) {
         qualities[i].src = gateway + prefix + qualities[i].hash
