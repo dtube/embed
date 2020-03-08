@@ -77,9 +77,7 @@ function startup() {
 
 function findInShortTerm(prov, hash, cb) {
     var gw = getDefaultGateway(prov)
-    var prefix = '/ipfs/'
-    if (prov == 'BTFS') prefix = '/btfs/'
-    const url = gw + prefix + hash
+    const url = gw + hash
     const request = new XMLHttpRequest();
     request.open("HEAD", url, true);
     request.onerror = function(e) {
@@ -261,8 +259,8 @@ function getDefaultGateway(prov, video) {
 }
 
 function getFallbackGateway(prov) {
-    if (prov == 'IPFS') return portals.IPFS[1].slice(0,-6)
-    if (prov == 'BTFS') return portals.BTFS[1].slice(0,-6)
+    if (prov == 'IPFS') return portals.IPFS[1]
+    if (prov == 'BTFS') return portals.BTFS[1]
     if (prov == 'Skynet') return portals.Skynet[1]
 }
 
@@ -683,11 +681,8 @@ function addQualitiesSource(qualities, gateway, prov) {
         }
         return
     }
-    var prefix = '/ipfs/'
-    if (gateway.indexOf('/btfs') > -1)
-        prefix = '/btfs/'
     for (let i = 0; i < qualities.length; i++) {
-        qualities[i].src = gateway + prefix + qualities[i].hash
+        qualities[i].src = gateway + qualities[i].hash
     }
 }
 
