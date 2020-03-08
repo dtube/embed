@@ -319,7 +319,7 @@
 .vjs-branding-logo {
     color: white;
     display: block;
-    background-image: url(DTube_White.svg);
+    background-image: url("https://emb.d.tube/DTube_White.svg");
     font-size: 1.5em;
     line-height: 2em;
     font-weight: 600;
