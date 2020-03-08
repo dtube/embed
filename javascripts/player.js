@@ -446,6 +446,8 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
         destination: "http://d.tube/#!/v/" + videoAuthor + '/' + videoPermlink,
         destinationTarget: "_blank"
     })
+
+    handleResize()
 }
 
 
@@ -693,4 +695,18 @@ function hasQuality(label, qualities) {
     for (let i = 0; i < qualities.length; i++) 
         if (qualities[i].label == label) return true
     return false
+}
+
+window.onresize = handleResize;
+function handleResize() {
+    if (!window) return
+    if (window.innerWidth >= 360) {
+        document.getElementsByClassName('vjs-time-control')[0].style.display = "block"
+        document.getElementsByClassName('vjs-time-control')[1].style.display = "block"
+        document.getElementsByClassName('vjs-time-control')[2].style.display = "block"
+    } else {
+        document.getElementsByClassName('vjs-time-control')[0].style.display = "none"
+        document.getElementsByClassName('vjs-time-control')[1].style.display = "none"
+        document.getElementsByClassName('vjs-time-control')[2].style.display = "none"
+    }
 }
