@@ -43,7 +43,8 @@ var videoAuthor = path.split("/")[0]
 var videoPermlink = path.split("/")[1]
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
-provider = path.split("/")[4]
+if (path.split("/")[4])
+    provider = path.split("/")[4]
 
 document.addEventListener("DOMContentLoaded", function(event) {
     startup()
@@ -75,8 +76,8 @@ function startup() {
         })
 }
 
-function findInShortTerm(prov, hash, cb) {
-    var gw = getDefaultGateway(prov)
+function findInShortTerm(hash, cb) {
+    var gw = prov.getDefaultGateway()
     const url = gw + hash
     const request = new XMLHttpRequest();
     request.open("HEAD", url, true);
@@ -96,7 +97,6 @@ function findInShortTerm(prov, hash, cb) {
 }
 
 function findAvalon(author, link, cb) {
-    // avalon
     fetch(avalonAPI+'/content/'+author+'/'+link, {
         method: 'get',
         headers: {
@@ -111,13 +111,6 @@ function findAvalon(author, link, cb) {
 }
 
 function findVideo(retries = 3) {
-    if (videoPermlink == 'live') {
-        document.addEventListener("DOMContentLoaded", function() {
-            createLiveStream(autoplay, nobranding, null) 
-        });
-               
-        return
-    }
     var api = steemAPI[(3-retries)%steemAPI.length]
     var client = new LightRPC(api, {
         timeout: timeout
@@ -141,16 +134,20 @@ function findVideo(retries = 3) {
 }
 
 function handleVideo(video) {
-    if (!provider) provider = getDefaultProvider(video)
-    
+    if (!provider) provider = prov.default(video)
     switch (provider) {
         // Our custom DTube Player
         case "IPFS":
         case "BTFS":
-            var gw = getDefaultGateway(provider, video)
+            var gw = prov.getDefaultGateway(video)
             var qualities = generateQualities(video)
-            findInShortTerm(provider, qualities[0].hash, function(isAvail) {
-                addQualitiesSource(qualities, (isAvail ? gw : getFallbackGateway(provider)))
+            if (!qualities || qualities.length == 0) {
+                console.log('No video found on '+provider)
+                prov.tryNext(video)
+                return
+            }
+            findInShortTerm(qualities[0].hash, function(isAvail) {
+                addQualitiesSource(qualities, (isAvail ? gw : prov.getFallbackGateway()))
         
                 var snapHash = getSnapHash(video)
                 var spriteHash = getSpriteHash(video)
@@ -161,8 +158,14 @@ function handleVideo(video) {
             break;
 
         case "Skynet":
-            var gw = getDefaultGateway(provider, video)
+            var gw = prov.getDefaultGateway(video)
             var qualities = generateQualities(video)
+            if (!qualities || qualities.length == 0) {
+                console.log('No video found on '+provider)
+                prov.tryNext(video)
+                return
+            }
+
             addQualitiesSource(qualities, gw, 'Skynet')
             
             var snapHash = getSnapHash(video)
@@ -218,50 +221,6 @@ function handleVideo(video) {
         default:
             break;
     }
-}
-
-function getDefaultProvider(video) {
-    if (video && video.providerName) return video.providerName
-    if (video && video.files) {
-        if (video.files.btfs)
-            return 'BTFS'
-        if (video.files.ipfs)
-            return 'IPFS'
-        if (video.files.sia)
-            return 'Skynet'
-        if (video.files.youtube)
-            return 'YouTube'
-        if (video.files.facebook)
-            return 'Facebook'
-        if (video.files.vimeo)
-            return 'Vimeo'
-        if (video.files.liveleak)
-            return 'LiveLeak'
-        if (video.files.instagram)
-            return 'Instagram'
-        if (video.files.dailymotion)
-            return 'Dailymotion'
-        if (video.files.twitch)
-            return 'Twitch'
-    }
-    return 'IPFS'
-}
-
-function getDefaultGateway(prov, video) {
-    if (prov == 'IPFS' && video && video.files && video.files.ipfs && video.files.ipfs.gw)
-        return video.files.ipfs.gw
-    if (prov == 'BTFS' && video && video.files && video.files.btfs && video.files.btfs.gw)
-        return video.files.btfs.gw
-    if (prov == 'IPFS') return portals.IPFS[0]
-    if (prov == 'BTFS') return portals.BTFS[0]
-    if (prov == 'Skynet') return portals.Skynet[0]
-    return
-}
-
-function getFallbackGateway(prov) {
-    if (prov == 'IPFS') return portals.IPFS[1]
-    if (prov == 'BTFS') return portals.BTFS[1]
-    if (prov == 'Skynet') return portals.Skynet[1]
 }
 
 function getSnapHash(video) {
@@ -449,115 +408,6 @@ function createPlayer(posterHash, autoplay, branding, qualities, sprite, duratio
     handleResize()
 }
 
-
-function createLiveStream(autoplay, branding, content) {
-    var c = document.createElement("video");
-    c.controls = true;
-    c.autoplay = autoplay;
-    c.id = "player";
-    c.className = "video-js";
-    c.style = "width:100%;height:100%";
-    c.addEventListener('loadeddata', function() {
-        if (c.readyState >= 3) {
-            itLoaded = true
-        }
-    });
-
-    var video = document.body.appendChild(c);
-    
-    player = videojs("player", {
-        inactivityTimeout: 1000,
-        techOrder: ["html5"],
-        controlBar: {
-            children: {
-                'playToggle': {},
-                'muteToggle': {},
-                'volumeControl': {},
-                'currentTimeDisplay': {},
-                'timeDivider': {},
-                'durationDisplay': {},
-                'liveDisplay': {},
-                'flexibleWidthSpacer': {},
-                'progressControl': {},
-                'fullscreenToggle': {}
-            }
-        },
-        plugins: {
-            persistvolume: {
-                namespace: 'dtube'
-            },
-            statistics: {
-
-            }
-        }
-    })
-
-    if (content) {
-        var request = new XMLHttpRequest();
-        var unix_timestamp = Date.parse(content.created+'Z')/1000
-        request.open('GET', 'https://stream.dtube.top:3000/oldStream/'+content.author+'/'+unix_timestamp, true);
-        request.onload = function() {
-            if (request.status >= 200 && request.status < 400) {
-                var data = JSON.parse(request.responseText)
-                if (data[0][0])
-                    var d0 = Math.abs(unix_timestamp - data[0][0].timeStart)
-                if (data[1][0])
-                    var d1 = Math.abs(unix_timestamp - data[1][0].timeStart)
-                var dn = Math.abs(+new Date()/1000 - unix_timestamp)
-                if (d1<d0 || !data[0][0]) {
-                    d0 = d1
-                    data[0][0] = data[1][0]
-                }
-                if (d0 && d0 < 5*60 && dn > 6*60*60) {
-                    console.log('playing old stream video', d0)
-                    videosrc = 'https://video.dtube.top/streams/'+data[0][0].filePath
-                    player.src(videosrc)
-                    return
-                }
-                var livesrc = 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8'
-                player.src({
-                    src: livesrc,
-                    type: 'application/x-mpegURL'
-                })
-                player.on('error', function(event) {
-                    console.log('playing old stream video', d0)
-                    videosrc = 'https://video.dtube.top/streams/'+data[0][0].filePath
-                    player.src(videosrc)
-                })
-                
-            } else {
-                console.log('Error stream API')
-            }
-        };
-        
-        request.onerror = function() {
-            console.log('Error stream API')
-        };
-        
-        request.send();
-    } else {
-        var livesrc = 'https://stream.dtube.top:4433/hls/normal%2b'+videoAuthor+'/index.m3u8'
-        player.src({
-            src: livesrc,
-            type: 'application/x-mpegURL'
-        })
-    }
-
-    videojs('player').ready(function() {
-        this.hotkeys({
-            seekStep: 5,
-            enableModifiersForNumbers: false
-        });
-    });
-
-    player.brand({
-        branding: !JSON.parse(nobranding),
-        title: "Watch on DTube",
-        destination: "http://d.tube/#!/v/" + videoAuthor + '/' + videoPermlink,
-        destinationTarget: "_blank"
-    })
-}
-
 function removePlayer() {
     var elem = document.getElementById('player');
     return elem.parentNode.removeChild(elem);
@@ -573,27 +423,26 @@ function spriteUrl(ipfsHash) {
 
 function generateQualities(a) {
     var qualities = []
-    // new format
+    var provId = prov.dispToId(provider)
+    // latest format
     if (a.files) {
-        for (const prov in a.files) {
-            if (!a.files[prov].vid) continue;
-            for (const key in a.files[prov].vid) {
-                if (key == 'src') {
-                    qualities.push({
-                        label: 'Source',
-                        type: 'video/mp4',
-                        hash: a.files[prov].vid.src,
-                        network: prov.toUpperCase()
-                    })
-                    continue
-                }
+        if (!a.files[provId] || !a.files[provId].vid) return [];
+        for (const key in a.files[provId].vid) {
+            if (key == 'src') {
                 qualities.push({
-                    label: key+'p',
+                    label: 'Source',
                     type: 'video/mp4',
-                    hash: a.files[prov].vid[key],
-                    network: prov.toUpperCase()
+                    hash: a.files[provId].vid.src,
+                    network: provider
                 })
+                continue
             }
+            qualities.push({
+                label: key+'p',
+                type: 'video/mp4',
+                hash: a.files[provId].vid[key],
+                network: provider
+            })
         }
         return qualities
     }
@@ -636,6 +485,7 @@ function generateQualities(a) {
             })
         }
     } else {
+        // super old video format
         if (a.content && a.content.video240hash) {
             qualities.push({
                 label: '240p',
@@ -696,6 +546,7 @@ function hasQuality(label, qualities) {
 window.onresize = handleResize;
 function handleResize() {
     if (!window) return
+    if (document.getElementsByClassName('vjs-time-control').length != 3) return
     if (window.innerWidth >= 360) {
         document.getElementsByClassName('vjs-time-control')[0].style.display = "block"
         document.getElementsByClassName('vjs-time-control')[1].style.display = "block"
