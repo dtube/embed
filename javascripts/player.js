@@ -149,11 +149,11 @@ function handleVideo(video) {
             findInShortTerm(qualities[0].hash, function(isAvail) {
                 addQualitiesSource(qualities, (isAvail ? gw : prov.getFallbackGateway()))
         
-                var snapHash = getSnapHash(video)
+                var coverUrl = getCoverUrl(video)
                 var spriteHash = getSpriteHash(video)
                 var duration = getDuration(video)
                 var subtitles = getSubtitles(video)
-                createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
+                createPlayer(coverUrl, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
             })
             break;
 
@@ -168,53 +168,53 @@ function handleVideo(video) {
 
             addQualitiesSource(qualities, gw, 'Skynet')
             
-            var snapHash = getSnapHash(video)
+            var coverUrl = getCoverUrl(video)
             var spriteHash = getSpriteHash(video)
             var duration = getDuration(video)
             var subtitles = getSubtitles(video)
             
-            createPlayer(snapHash, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
+            createPlayer(coverUrl, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
             break;
 
         // Redirects to 3rd party embeds
         case "Twitch":
             if (video.twitch_type && video.twitch_type == 'clip')
-              window.location.href = "https://clips.twitch.tv/embed?clip=" + video.videoId
+              window.location.href = "https://clips.twitch.tv/embed?clip=" + getVideoId(video)
                 + "&autoplay=true&muted=false"
             else
-                if (parseInt(video.videoId) == video.videoId)
-                    window.location.href =  "https://player.twitch.tv/?video=v" + video.videoId
+                if (parseInt(getVideoId(video)) == getVideoId(video))
+                    window.location.href =  "https://player.twitch.tv/?video=v" + getVideoId(video)
                         + "&autoplay=true&muted=false"
                 else
-                    window.location.href = "https://player.twitch.tv/?channel=" + video.videoId
+                    window.location.href = "https://player.twitch.tv/?channel=" + getVideoId(video)
                         + "&autoplay=true&muted=false"
             break;
 
         case "Dailymotion":
-            window.location.href = "https://www.dailymotion.com/embed/video/" + video.videoId
+            window.location.href = "https://www.dailymotion.com/embed/video/" + getVideoId(video)
                 + "?autoplay=true&mute=false"
             break;
 
         case "Instagram":
-            window.location.href = "https://www.instagram.com/p/" + video.videoId + '/embed/'
+            window.location.href = "https://www.instagram.com/p/" + getVideoId(video) + '/embed/'
             break;
 
         case "LiveLeak":
-            window.location.href = "https://www.liveleak.com/e/" + video.videoId
+            window.location.href = "https://www.liveleak.com/e/" + getVideoId(video)
             break;
 
         case "Vimeo":
-            window.loaction.href = "https://player.vimeo.com/video/" + video.videoId
+            window.location.href = "https://player.vimeo.com/video/" + getVideoId(video)
                 + "?autoplay=1&muted=0"
             break;
 
         case "Facebook":
             window.location.href = "https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
-                + encodeURI(video.url)
+                + encodeURI('https://www.facebook.com/watch/?v=') + getVideoId(video)
             break;
 
         case "YouTube":
-            window.location.href = "https://www.youtube.com/embed/" + video.videoId
+            window.location.href = "https://www.youtube.com/embed/" + getVideoId(video)
                 + "?autoplay=1&showinfo=1&modestbranding=1"
             break;
 
@@ -223,17 +223,28 @@ function handleVideo(video) {
     }
 }
 
-function getSnapHash(video) {
+function getVideoId(video) {
+    if (video.providerName == provider && video.videoId)
+        return video.videoId
+    if (video.files && video.files[prov.dispToId(provider)])
+        return video.files[prov.dispToId(provider)]
+    return ''
+}
+
+function getCoverUrl(video) {
+    var gw = 'https://snap1.d.tube/ipfs/'
     if (video.files && video.files.btfs && video.files.btfs.img && video.files.btfs.img["360"])
-        return video.files.btfs.img["360"]
+        return gw+video.files.btfs.img["360"]
     if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img["360"])
-        return video.files.ipfs.img["360"]
+        return gw+video.files.ipfs.img["360"]
     if (video.files && video.files.btfs && video.files.btfs.img && video.files.btfs.img["118"])
-        return video.files.btfs.img["118"]
+        return gw+video.files.btfs.img["118"]
     if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img["118"])
-        return video.files.ipfs.img["118"]
-    if (video.ipfs && video.ipfs.snaphash) return video.ipfs.snaphash
-    if (video.info && video.info.snaphash) return video.info.snaphash
+        return gw+video.files.ipfs.img["118"]
+    if (video.ipfs && video.ipfs.snaphash) return gw+video.ipfs.snaphash
+    if (video.info && video.info.snaphash) return gw+video.info.snaphash
+    if (video.files && video.files.youtube)
+        return 'http://i.ytimg.com/vi/'+video.files.youtube+'/hqdefault.jpg'
     return ''
 }
 
@@ -289,9 +300,10 @@ function enableSprite(duration, sprite) {
     player.thumbnails(listThumbnails);
 }
 
-function createPlayer(posterHash, autoplay, branding, qualities, sprite, duration, subtitles) {
+function createPlayer(snapUrl, autoplay, branding, qualities, sprite, duration, subtitles) {
     var c = document.createElement("video");
-    c.poster = 'https://snap1.d.tube/ipfs/'+posterHash;
+    if (snapUrl)
+        c.poster = snapUrl;
     c.controls = true;
     c.autoplay = autoplay;
     c.id = "player";

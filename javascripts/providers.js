@@ -56,26 +56,20 @@ prov = {
     available: function(video) {
         var provs = []
         if (video && video.files) {
-            if (video.files.btfs)
-                provs.push('BTFS')
-            if (video.files.ipfs)
-                provs.push('IPFS')
-            if (video.files.sia)
-                provs.push('Skynet')
-            if (video.files.youtube)
-                provs.push('YouTube')
-            if (video.files.facebook)
-                provs.push('Facebook')
-            if (video.files.vimeo)
-                provs.push('Vimeo')
-            if (video.files.liveleak)
-                provs.push('LiveLeak')
-            if (video.files.instagram)
-                provs.push('Instagram')
-            if (video.files.dailymotion)
-                provs.push('Dailymotion')
-            if (video.files.twitch)
-                provs.push('Twitch')
+            for (let i = 0; i < allProviders.length; i++) {
+                if (allProviders[i].dht == 1) {
+                    if (
+                        video.files[allProviders[i].id] &&
+                        video.files[allProviders[i].id].vid &&
+                        Object.keys(video.files[allProviders[i].id].vid).length > 0
+                    ) {
+                        provs.push(allProviders[i].disp)
+                    }
+                } else {
+                    if (video.files[allProviders[i].id])
+                        provs.push(allProviders[i].disp)
+                }
+            }
         }
         if (video && video.providerName && provs.indexOf(video.providerName) == -1) 
             provs.push(video.providerName)
@@ -84,26 +78,20 @@ prov = {
     default: function(video) {
         if (video && video.providerName) return video.providerName
         if (video && video.files) {
-            if (video.files.btfs)
-                return 'BTFS'
-            if (video.files.ipfs)
-                return 'IPFS'
-            if (video.files.sia)
-                return 'Skynet'
-            if (video.files.youtube)
-                return 'YouTube'
-            if (video.files.facebook)
-                return 'Facebook'
-            if (video.files.vimeo)
-                return 'Vimeo'
-            if (video.files.liveleak)
-                return 'LiveLeak'
-            if (video.files.instagram)
-                return 'Instagram'
-            if (video.files.dailymotion)
-                return 'Dailymotion'
-            if (video.files.twitch)
-                return 'Twitch'
+            for (let i = 0; i < allProviders.length; i++) {
+                if (allProviders[i].dht == 1) {
+                    if (
+                        video.files[allProviders[i].id] &&
+                        video.files[allProviders[i].id].vid &&
+                        Object.keys(video.files[allProviders[i].id].vid).length > 0
+                    ) {
+                        return allProviders[i].disp
+                    }
+                } else {
+                    if (video.files[allProviders[i].id])
+                        return allProviders[i].disp
+                }
+            }
         }
         return 'IPFS'
     }
