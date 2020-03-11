@@ -57,7 +57,7 @@ function startup() {
     if (videoAuthor === '') {
         try {
             var json = JSOUN.decode(videoPermlink)
-            console.log('Video loaded from URL', json)
+            console.log('Video JSON loaded from URL', json)
         } catch (error) {
             console.log('Bad video JSON', error)
             return
@@ -70,7 +70,7 @@ function startup() {
                 console.log(err, res)
                 findVideo()
             } else {
-                console.log('Video loaded from '+avalonAPI, res)
+                console.log('Video JSON loaded from '+avalonAPI, res)
                 handleVideo(res.json)
             }
         })
