@@ -135,6 +135,7 @@ function findVideo(retries = 3) {
 
 function handleVideo(video) {
     if (!provider) provider = prov.default(video)
+    console.log('Trying... '+provider)
     switch (provider) {
         // Our custom DTube Player
         case "IPFS":
