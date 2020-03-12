@@ -142,7 +142,6 @@ function handleVideo(video) {
             var gw = prov.getDefaultGateway(video)
             var qualities = generateQualities(video)
             if (!qualities || qualities.length == 0) {
-                console.log('No video found on '+provider)
                 prov.tryNext(video)
                 return
             }
@@ -161,7 +160,6 @@ function handleVideo(video) {
             var gw = prov.getDefaultGateway(video)
             var qualities = generateQualities(video)
             if (!qualities || qualities.length == 0) {
-                console.log('No video found on '+provider)
                 prov.tryNext(video)
                 return
             }
