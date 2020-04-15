@@ -13,4 +13,4 @@ Example:
  
 [https://emb.d.tube/#!/elsiekjay/QmQXCBVvVn6WRCuxV3K2FoYLX6F98TvWYPorJEdEyz7VPr/true](https://emb.d.tube/#!/elsiekjay/QmQXCBVvVn6WRCuxV3K2FoYLX6F98TvWYPorJEdEyz7VPr/true) -> will autoplay and keep dtube branding
 
-Autoplay is not always going to happen. It depends on the media engagement (see chrome://media-engagement)
+Autoplay is not always going to happen. It depends on the media engagement, see chrome://media-engagement
