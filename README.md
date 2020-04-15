@@ -11,4 +11,4 @@ The syntax is as follow `/#!/author/permlink/autoplay/branding`
  
 Example:
  
-`https://emb.d.tube/#!/supremegold22/s3k3cjji/true/true` -> will autoplay and remove dtube logo
+`https://emb.d.tube/#!/elsiekjay/QmQXCBVvVn6WRCuxV3K2FoYLX6F98TvWYPorJEdEyz7VPr/true/true` -> will autoplay and remove dtube logo
