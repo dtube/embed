@@ -38,6 +38,14 @@ BtfsShortTermGw = "https://player.d.tube"
 player = null
 itLoaded = false
 timeout = 1500
+
+if (window.location.search.indexOf('?v=') === 0) {
+    // redirect query string to real url
+    var leftPart = window.location.href.split('?v=')[0]
+    var rightPart = '#!/'+window.location.search.split('?v=')[1]
+    window.location.href = leftPart+rightPart
+}
+
 var path = window.location.href.split("#!/")[1];
 var videoAuthor = path.split("/")[0]
 var videoPermlink = path.split("/")[1]
@@ -311,6 +319,9 @@ function createPlayer(snapUrl, autoplay, branding, qualities, sprite, duration, 
     c.addEventListener('loadeddata', function() {
         if (c.readyState >= 3) {
             itLoaded = true
+            // player.muted(true);
+            // player.play();
+            // player.muted(false);
             if (!duration) {
                 duration = Math.round(player.duration())
                 parent.postMessage({dur: duration}, "*")
