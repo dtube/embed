@@ -41,9 +41,22 @@ timeout = 1500
 
 if (window.location.search.indexOf('?v=') === 0) {
     // redirect query string to real url
-    var leftPart = window.location.href.split('?v=')[0]
-    var rightPart = '#!/'+window.location.search.split('?v=')[1]
-    window.location.href = leftPart+rightPart
+    var newUrl = [window.location.href.split('?v=')[0]]
+    newUrl.push('#!/')
+    var rightPart = window.location.search.split('?v=')[1]
+    if (rightPart.indexOf('&') === -1)
+        newUrl.push(rightPart)
+    else {
+        var query = rightPart.split('&')
+        newUrl.push(query[0])
+        for (let i = 1; i < query.length; i++)
+            if (query[i] == 'autoplay=1' || query[i] == 'auto_play=true') {
+                newUrl.push('/true')
+                break
+            }
+    }
+
+    window.location.href = newUrl.join('')
 }
 
 var path = window.location.href.split("#!/")[1];
