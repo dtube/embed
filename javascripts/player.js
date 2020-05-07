@@ -56,7 +56,7 @@ if (window.location.search.indexOf('?v=') === 0) {
             }
     }
 
-    window.location.href = newUrl.join('')
+    window.location.replace(newUrl.join(''))
 }
 
 var path = window.location.href.split("#!/")[1];
@@ -199,43 +199,43 @@ function handleVideo(video) {
         // Redirects to 3rd party embeds
         case "Twitch":
             if (video.twitch_type && video.twitch_type == 'clip')
-              window.location.href = "https://clips.twitch.tv/embed?clip=" + getVideoId(video)
-                + "&autoplay=true&muted=false"
+              window.location.replace("https://clips.twitch.tv/embed?clip=" + getVideoId(video)
+                + "&autoplay=true&muted=false")
             else
                 if (parseInt(getVideoId(video)) == getVideoId(video))
-                    window.location.href =  "https://player.twitch.tv/?video=v" + getVideoId(video)
-                        + "&autoplay=true&muted=false"
+                    window.location.replace( "https://player.twitch.tv/?video=v" + getVideoId(video)
+                        + "&autoplay=true&muted=false")
                 else
-                    window.location.href = "https://player.twitch.tv/?channel=" + getVideoId(video)
-                        + "&autoplay=true&muted=false"
+                    window.location.replace("https://player.twitch.tv/?channel=" + getVideoId(video)
+                        + "&autoplay=true&muted=false")
             break;
 
         case "Dailymotion":
-            window.location.href = "https://www.dailymotion.com/embed/video/" + getVideoId(video)
-                + "?autoplay=true&mute=false"
+            window.location.replace("https://www.dailymotion.com/embed/video/" + getVideoId(video)
+                + "?autoplay=true&mute=false")
             break;
 
         case "Instagram":
-            window.location.href = "https://www.instagram.com/p/" + getVideoId(video) + '/embed/'
+            window.location.replace("https://www.instagram.com/p/" + getVideoId(video) + '/embed/')
             break;
 
         case "LiveLeak":
-            window.location.href = "https://www.liveleak.com/e/" + getVideoId(video)
+            window.location.replace("https://www.liveleak.com/e/" + getVideoId(video))
             break;
 
         case "Vimeo":
-            window.location.href = "https://player.vimeo.com/video/" + getVideoId(video)
-                + "?autoplay=1&muted=0"
+            window.location.replace("https://player.vimeo.com/video/" + getVideoId(video)
+                + "?autoplay=1&muted=0")
             break;
 
         case "Facebook":
-            window.location.href = "https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
-                + encodeURI('https://www.facebook.com/watch/?v=') + getVideoId(video)
+            window.location.replace("https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
+                + encodeURI('https://www.facebook.com/watch/?v=') + getVideoId(video))
             break;
 
         case "YouTube":
-            window.location.href = "https://www.youtube.com/embed/" + getVideoId(video)
-                + "?autoplay=1&showinfo=1&modestbranding=1"
+            window.location.replace("https://www.youtube.com/embed/" + getVideoId(video)
+                + "?autoplay=1&showinfo=1&modestbranding=1")
             break;
 
         default:
