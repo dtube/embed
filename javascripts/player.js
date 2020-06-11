@@ -199,7 +199,7 @@ function handleVideo(video) {
         // Redirects to 3rd party embeds
         case "Twitch":
             var parent = window.location.hostname
-            if (window.location.ancestorOrigins)
+            if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0)
                 parent = window.location.ancestorOrigins[0].split('//')[1]
             if (parent.indexOf(':') > -1)
                 parent = parent.split(':')[0]
