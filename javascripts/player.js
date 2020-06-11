@@ -199,6 +199,10 @@ function handleVideo(video) {
         // Redirects to 3rd party embeds
         case "Twitch":
             var parent = window.location.hostname
+            if (window.location.ancestorOrigins)
+                parent = window.location.ancestorOrigins[0].split('//')[1]
+            if (parent.indexOf(':') > -1)
+                parent = parent.split(':')[0]
             if (video.twitch_type && video.twitch_type == 'clip')
               window.location.replace("https://clips.twitch.tv/embed?clip=" + getVideoId(video)
                 + "&autoplay=true&muted=false&parent="+parent)
