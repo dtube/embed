@@ -198,16 +198,17 @@ function handleVideo(video) {
 
         // Redirects to 3rd party embeds
         case "Twitch":
+            var parent = window.location.hostname
             if (video.twitch_type && video.twitch_type == 'clip')
               window.location.replace("https://clips.twitch.tv/embed?clip=" + getVideoId(video)
-                + "&autoplay=true&muted=false")
+                + "&autoplay=true&muted=false&parent="+parent)
             else
                 if (parseInt(getVideoId(video)) == getVideoId(video))
                     window.location.replace( "https://player.twitch.tv/?video=v" + getVideoId(video)
-                        + "&autoplay=true&muted=false")
+                        + "&autoplay=true&muted=false&parent="+parent)
                 else
                     window.location.replace("https://player.twitch.tv/?channel=" + getVideoId(video)
-                        + "&autoplay=true&muted=false")
+                        + "&autoplay=true&muted=false&parent="+parent)
             break;
 
         case "Dailymotion":
