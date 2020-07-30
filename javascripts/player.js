@@ -157,6 +157,7 @@ function findVideo(retries = 3) {
 function handleVideo(video) {
     if (!provider) provider = prov.default(video)
     console.log('Trying... '+provider)
+    var redirectLink = 'https://'
     switch (provider) {
         // Our custom DTube Player
         case "IPFS":
@@ -204,48 +205,74 @@ function handleVideo(video) {
             if (parent.indexOf(':') > -1)
                 parent = parent.split(':')[0]
             if (video.twitch_type && video.twitch_type == 'clip')
-              window.location.replace("https://clips.twitch.tv/embed?clip=" + getVideoId(video)
-                + "&autoplay=true&muted=false&parent="+parent)
+              redirectLink += "clips.twitch.tv/embed?clip=" + getVideoId(video)
             else
                 if (parseInt(getVideoId(video)) == getVideoId(video))
-                    window.location.replace( "https://player.twitch.tv/?video=v" + getVideoId(video)
-                        + "&autoplay=true&muted=false&parent="+parent)
+                    redirectLink +=  "player.twitch.tv/?video=v" + getVideoId(video)
                 else
-                    window.location.replace("https://player.twitch.tv/?channel=" + getVideoId(video)
-                        + "&autoplay=true&muted=false&parent="+parent)
+                    redirectLink += "player.twitch.tv/?channel=" + getVideoId(video)
+            
+            if (autoplay)
+                redirectLink += "&autoplay=true"
+            else
+                redirectLink += "&autoplay=false"
+            redirectLink += "&muted=false&parent="+parent
             break;
 
         case "Dailymotion":
-            window.location.replace("https://www.dailymotion.com/embed/video/" + getVideoId(video)
-                + "?autoplay=true&mute=false")
+            redirectLink += "www.dailymotion.com/embed/video/" + getVideoId(video)
+            if (autoplay)
+                redirectLink += "?autoplay=true"
+            else
+                redirectLink += "?autoplay=false"
+            redirectLink += "&mute=false"
             break;
 
         case "Instagram":
-            window.location.replace("https://www.instagram.com/p/" + getVideoId(video) + '/embed/')
+            redirectLink += "www.instagram.com/p/" + getVideoId(video) + '/embed/'
             break;
 
         case "LiveLeak":
-            window.location.replace("https://www.liveleak.com/e/" + getVideoId(video))
+            redirectLink += "www.liveleak.com/e/" + getVideoId(video)
             break;
 
         case "Vimeo":
-            window.location.replace("https://player.vimeo.com/video/" + getVideoId(video)
-                + "?autoplay=1&muted=0")
+            redirectLink += "player.vimeo.com/video/" + getVideoId(video)
+            if (autoplay)
+                redirectLink += "?autoplay=1"
+            else
+                redirectLink += "?autoplay=0"
+            redirectLink += "&muted=0"
             break;
 
         case "Facebook":
-            window.location.replace("https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href="
-                + encodeURI('https://www.facebook.com/watch/?v=') + getVideoId(video))
+            redirectLink += "www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true"
+            if (autoplay)
+                redirectLink += "&autoplay=true"
+            else
+                redirectLink += "&autoplay=false"
+            redirectLink += "&container_width=800&href=" + encodeURI('https://www.facebook.com/watch/?v=') + getVideoId(video)
             break;
 
         case "YouTube":
-            window.location.replace("https://www.youtube.com/embed/" + getVideoId(video)
-                + "?autoplay=1&showinfo=1&modestbranding=1")
+            redirectLink += "www.youtube.com/embed/" + getVideoId(video)
+            if (autoplay)
+                redirectLink += "?autoplay=1"
+            else
+                redirectLink += "?autoplay=0"
+            redirectLink += "&showinfo=1"
+            if (nobranding)
+                redirectLink += "&modestbranding=1"
+
             break;
 
         default:
+            redirectLink = false
             break;
     }
+
+    if (redirectLink && redirectLink != 'https://')
+        window.location.replace(redirectLink)
 }
 
 function getVideoId(video) {
