@@ -7,7 +7,7 @@ The syntax is as follow `/#!/author/permlink/autoplay/branding`
 * Author: the steem username of the account associated with the content
 * Permlink: the permlink of the steem content, or 'live' for the user livestream
 * Autoplay: true/false, default to false. If true, the video will start playing without click
-* Branding: true/false, default to false. If true, the DTube logo will be hidden
+* Modest Branding: true/false, default to false. If true, the DTube logo will be hidden
  
 Example:
  
