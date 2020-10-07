@@ -1,14 +1,11 @@
 portals = {
     IPFS: [
-        "https://video.dtube.top/ipfs/",
         "https://video.oneloveipfs.com/ipfs/",
-        "https://ipfs.busy.org/ipfs/",
-        "https://ipfsgateway.makingblocks.xyz/ipfs/",
-        "https://ipfs.io/ipfs/",
         "https://ipfs.infura.io/ipfs/",
         "https://gateway.temporal.cloud/ipfs/",
         "https://gateway.pinata.cloud/ipfs/",
-        "https://ipfs.eternum.io/ipfs/"
+        "https://ipfs.eternum.io/ipfs/",
+        "https://ipfs.io/ipfs/"
     ],
     BTFS: [
         "https://player.d.tube/btfs/",
