@@ -76,11 +76,11 @@ if (path.split("/")[5]) {
 
 function getOption(key) {
     if(typeof additionalOptions[key] !== "undefined") {
-        return additionalOptions[key];
+        return additionalOptions[key] == "false" ? false : additionalOptions[key];
     }
 
     if(typeof defaultOptions[key] !== "undefined") {
-        return defaultOptions[key];
+        return defaultOptions[key] == "false" ? false : additionalOptions[key];
     }
 
     return null;
