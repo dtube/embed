@@ -262,6 +262,8 @@ function handleVideo(video) {
             else
                 redirectLink += "?autoplay=0"
             redirectLink += "&muted=0"
+            if(getOption("loop"))
+                redirectLink += "&loop=1"
             break;
 
         case "Facebook":
@@ -282,6 +284,8 @@ function handleVideo(video) {
             redirectLink += "&showinfo=1"
             if (nobranding)
                 redirectLink += "&modestbranding=1"
+            if (getOption("loop"))
+                redirectLink += "&loop=1"
 
             break;
 
@@ -380,6 +384,7 @@ function createPlayer(snapUrl, autoplay, branding, qualities, sprite, duration, 
     c.id = "player";
     c.className = "video-js";
     c.style = "width:100%;height:100%";
+    c.loop = getOption("loop");
     c.addEventListener('loadeddata', function() {
         if (c.readyState >= 3) {
             itLoaded = true
