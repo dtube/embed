@@ -35,6 +35,9 @@ BtfsShortTermGw = "https://player.d.tube"
 player = null
 itLoaded = false
 timeout = 1500
+defaultOptions = {
+    loop: false
+}
 
 if (window.location.search.indexOf('?v=') === 0) {
     // redirect query string to real url
@@ -61,8 +64,27 @@ var videoAuthor = path.split("/")[0]
 var videoPermlink = path.split("/")[1]
 var autoplay = (path.split("/")[2] == 'true')
 var nobranding = (path.split("/")[3] == 'true')
-if (path.split("/")[4])
+if (path.split("/")[4] && path.split("/")[4] !== "default")
     provider = path.split("/")[4]
+
+var additionalOptions = {};
+if (path.split("/")[5]) {
+    // The 5th part is parsed as a URL-Parameters if set
+    // https://stackoverflow.com/questions/8648892/how-to-convert-url-parameters-to-a-javascript-object
+    additionalOptions = JSON.parse('{"' + decodeURI(path.split("/")[5]).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+}
+
+function getOption(key) {
+    if(typeof additionalOptions[key] !== "undefined") {
+        return additionalOptions[key];
+    }
+
+    if(typeof defaultOptions[key] !== "undefined") {
+        return defaultOptions[key];
+    }
+
+    return null;
+}
 
 document.addEventListener("DOMContentLoaded", function(event) {
     startup()
