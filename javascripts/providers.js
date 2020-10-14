@@ -40,9 +40,9 @@ prov = {
     },
     getDefaultGateway: function(video) {
         if (provider == 'IPFS' && video && video.files && video.files.ipfs && video.files.ipfs.gw)
-            return video.files.ipfs.gw
+            return video.files.ipfs.gw + '/ipfs/'
         if (provider == 'BTFS' && video && video.files && video.files.btfs && video.files.btfs.gw)
-            return video.files.btfs.gw
+            return video.files.btfs.gw + '/btfs/'
         if (provider == 'IPFS') return portals.IPFS[0]
         if (provider == 'BTFS') return portals.BTFS[0]
         if (provider == 'Skynet') return portals.Skynet[0]
