@@ -1,5 +1,7 @@
 portals = {
     IPFS: [
+        "https://player.d.tube/ipfs/",
+        "https://ipfs.d.tube/ipfs/",
         "https://video.oneloveipfs.com/ipfs/",
         "https://ipfs.infura.io/ipfs/",
         "https://gateway.temporal.cloud/ipfs/",
