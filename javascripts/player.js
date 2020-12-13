@@ -118,8 +118,8 @@ function startup() {
         })
 }
 
-function findInShortTerm(hash, cb) {
-    var gw = prov.getDefaultGateway()
+function findInShortTerm(hash, video, cb) {
+    var gw = prov.getDefaultGateway(video)
     const url = gw + hash
     const request = new XMLHttpRequest();
     request.open("HEAD", url, true);
@@ -189,7 +189,7 @@ function handleVideo(video) {
                 prov.tryNext(video)
                 return
             }
-            findInShortTerm(qualities[0].hash, function(isAvail) {
+            findInShortTerm(qualities[0].hash, video, function(isAvail) {
                 addQualitiesSource(qualities, (isAvail ? gw : prov.getFallbackGateway()))
         
                 var coverUrl = getCoverUrl(video)
