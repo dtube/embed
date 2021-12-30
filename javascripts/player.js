@@ -196,7 +196,8 @@ function handleVideo(video) {
                 var spriteHash = getSpriteHash(video)
                 var duration = getDuration(video)
                 var subtitles = getSubtitles(video)
-                createPlayer(coverUrl, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
+                let spriteSource = getSpriteSource(video)
+                createPlayer(coverUrl, autoplay, nobranding, qualities, spriteHash, spriteSource, duration, subtitles)
             })
             break;
 
@@ -214,8 +215,9 @@ function handleVideo(video) {
             var spriteHash = getSpriteHash(video)
             var duration = getDuration(video)
             var subtitles = getSubtitles(video)
+            let spriteSource = getSpriteSource(video)
             
-            createPlayer(coverUrl, autoplay, nobranding, qualities, spriteHash, duration, subtitles)
+            createPlayer(coverUrl, autoplay, nobranding, qualities, spriteHash, spriteSource, duration, subtitles)
             break;
 
         // Redirects to 3rd party embeds
@@ -330,10 +332,22 @@ function getSpriteHash(video) {
         return video.files.btfs.img.spr
     if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img.spr)
         return video.files.ipfs.img.spr
+    if (video.files && video.files.sia && video.files.sia.img && video.files.sia.img.spr)
+        return video.files.sia.img.spr
     if (video.ipfs && video.ipfs.spritehash) return video.ipfs.spritehash
     if (video.content && video.content.spritehash) return video.content.spritehash
     if (video.info && video.info.spritehash) return video.info.spritehash
     return ''
+}
+
+function getSpriteSource(video) {
+    if (video.files && video.files.btfs && video.files.btfs.img && video.files.btfs.img.spr)
+        return 'btfs'
+    if (video.files && video.files.ipfs && video.files.ipfs.img && video.files.ipfs.img.spr)
+        return 'ipfs'
+    if (video.files && video.files.sia && video.files.sia.img && video.files.sia.img.spr)
+        return 'sia'
+    return 'ipfs'
 }
 
 function getDuration(video) {
@@ -358,7 +372,7 @@ function getSubtitles(video) {
     return null
 }
 
-function enableSprite(duration, sprite) {
+function enableSprite(duration, sprite, source) {
     if (!duration) return
     if (!sprite) return
     var listThumbnails = {}
@@ -368,7 +382,7 @@ function enableSprite(duration, sprite) {
         var nSeconds = s
         if (duration > 100) nSeconds = Math.floor(s * duration / 100)
         listThumbnails[nSeconds] = {
-            src: spriteUrl(sprite),
+            src: spriteUrl(sprite, source),
             style: {
                 margin: -72 * s + 'px 0px 0px 0px',
             }
@@ -377,7 +391,7 @@ function enableSprite(duration, sprite) {
     player.thumbnails(listThumbnails);
 }
 
-function createPlayer(snapUrl, autoplay, branding, qualities, sprite, duration, subtitles) {
+function createPlayer(snapUrl, autoplay, branding, qualities, sprite, spriteSource, duration, subtitles) {
     var c = document.createElement("video");
     if (snapUrl)
         c.poster = snapUrl;
@@ -396,7 +410,7 @@ function createPlayer(snapUrl, autoplay, branding, qualities, sprite, duration, 
             if (!duration) {
                 duration = Math.round(player.duration())
                 parent.postMessage({dur: duration}, "*")
-                enableSprite(duration, sprite)
+                enableSprite(duration, sprite, spriteSource)
             }
         }
     });
@@ -458,7 +472,7 @@ function createPlayer(snapUrl, autoplay, branding, qualities, sprite, duration, 
             }
         }
     })
-    enableSprite(duration, sprite)
+    enableSprite(duration, sprite, spriteSource)
     videojs('player').ready(function() {
         const adapter = new playerjs.VideoJSAdapter(this)
         
@@ -510,8 +524,13 @@ function subtitleUrl(ipfsHash) {
     return 'https://snap1.d.tube/ipfs/' + ipfsHash
 }
 
-function spriteUrl(ipfsHash) {
-    return 'https://sprite.d.tube/btfs/' + ipfsHash
+function spriteUrl(ipfsHash, source) {
+    if (source === 'ipfs')
+        return 'https://ipfs.d.tube/ipfs/' + ipfsHash
+    else if (source === 'btfs')
+        return 'https://btfs.d.tube/btfs/' + ipfsHash
+    else if (source === 'sia')
+        return 'https://siasky.net/' + source
 }
 
 function generateQualities(a) {
