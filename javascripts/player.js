@@ -184,7 +184,7 @@ function handleVideo(video) {
         case "IPFS":
         case "BTFS":
             var gw = prov.getDefaultGateway(video)
-            var qualities = generateQualities(video, isHLS(video) ? 'application/x-mpegURL' : 'video/mp4')
+            var qualities = generateQualities(video)
             if (!qualities || qualities.length == 0) {
                 prov.tryNext(video)
                 return
@@ -203,7 +203,7 @@ function handleVideo(video) {
 
         case "Skynet":
             var gw = prov.getDefaultGateway(video)
-            var qualities = generateQualities(video, isHLS(video) ? 'application/x-mpegURL' : 'video/mp4')
+            var qualities = generateQualities(video)
             if (!qualities || qualities.length == 0) {
                 prov.tryNext(video)
                 return
@@ -533,7 +533,7 @@ function spriteUrl(ipfsHash, source) {
         return 'https://siasky.net/' + source
 }
 
-function generateQualities(a, type = 'video/mp4') {
+function generateQualities(a) {
     var qualities = []
     var provId = prov.dispToId(provider)
     // latest format
@@ -543,7 +543,7 @@ function generateQualities(a, type = 'video/mp4') {
             if (key == 'src') {
                 qualities.push({
                     label: 'Source',
-                    type: type,
+                    type: a.files[provId].vid.src.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                     hash: a.files[provId].vid.src,
                     network: provider
                 })
@@ -551,7 +551,7 @@ function generateQualities(a, type = 'video/mp4') {
             }
             qualities.push({
                 label: key+'p',
-                type: type,
+                type: a.files[provId].vid[key].endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.files[provId].vid[key],
                 network: provider
             })
@@ -564,35 +564,35 @@ function generateQualities(a, type = 'video/mp4') {
         if (a.ipfs.video240hash) {
             qualities.push({
                 label: '240p',
-                type: type,
+                type: a.ipfs.video240hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.ipfs.video240hash,
             })
         }
         if (a.ipfs.video480hash) {
             qualities.push({
                 label: '480p',
-                type: type,
+                type: a.ipfs.video480hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.ipfs.video480hash,
             })
         }
         if (a.ipfs.video720hash) {
             qualities.push({
                 label: '720p',
-                type: type,
+                type: a.ipfs.video720hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.ipfs.video720hash,
             })
         }
         if (a.ipfs.video1080hash) {
             qualities.push({
                 label: '1080p',
-                type: type,
+                type: a.ipfs.video1080hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.ipfs.video1080hash,
             })
         }
         if (a.ipfs.videohash) {
             qualities.push({
                 label: 'Source',
-                type: type,
+                type: a.ipfs.videohash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.ipfs.videohash,
             })
         }
@@ -601,35 +601,35 @@ function generateQualities(a, type = 'video/mp4') {
         if (a.content && a.content.video240hash) {
             qualities.push({
                 label: '240p',
-                type: type,
+                type: a.content.video240hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.content.video240hash,
             })
         }
         if (a.content && a.content.video480hash) {
             qualities.push({
                 label: '480p',
-                type: type,
+                type: a.content.video480hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.content.video480hash,
             })
         }
         if (a.content && a.content.video720hash) {
             qualities.push({
                 label: '720p',
-                type: type,
+                type: a.content.video720hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.content.video720hash,
             })
         }
         if (a.content && a.content.video1080hash) {
             qualities.push({
                 label: '1080p',
-                type: type,
+                type: a.content.video1080hash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.content.video1080hash,
             })
         }
         if (a.content && a.content.videohash) {
             qualities.push({
                 label: 'Source',
-                type: type,
+                type: a.content.videohash.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4',
                 hash: a.content.videohash,
             })
         }
@@ -668,13 +668,4 @@ function handleResize() {
         document.getElementsByClassName('vjs-time-control')[1].style.display = "none"
         document.getElementsByClassName('vjs-time-control')[2].style.display = "none"
     }
-}
-
-function isHLS(video) {
-    if ((video.files && video.files.ipfs && video.files.ipfs.fmt === 'hls') ||
-        (video.files && video.files.btfs && video.files.btfs.fmt === 'hls') ||
-        (video.files && video.files.sia && video.files.sia.fmt === 'hls'))
-        return true
-    else
-        return false
 }
