@@ -24,6 +24,6 @@
   "homepage": "https://github.com/dtube/embed#readme",
   "devDependencies": {
     "clean-css": "^4.2.3",
-    "terser": "^4.6.6"
+    "terser": "^4.8.1"
   }
 }
